@@ -36,6 +36,9 @@ typedef struct {
     double boxSliderColors[9];
     double boxSliderColorsAlt[9];
     list_t *undoList;
+    uint32_t undoIndex;
+    uint32_t firstUndo;
+    uint32_t firstRedo;
     int8_t keys[10];
     uint32_t copyMessage;
     int32_t dragBox;
@@ -140,38 +143,97 @@ void init() {
     }
 
     self.undoList = list_init();
+    self.undoIndex = 0;
     self.copyMessage = 0;
     self.dragBox = -1;
     self.saved = 1;
+    self.firstUndo = 1;
+    self.firstRedo = 1;
     memset(self.keys, 0, sizeof(self.keys));
 }
 
 void addToUndo() {
-    printf("addToUndo\n");
-    for (uint32_t i = 0; i < NUMBER_OF_BOXES; i++) {
-        list_append(self.undoList, (unitype) self.newColorPalette[i * 6 + 0], 'd');
-        list_append(self.undoList, (unitype) self.newColorPalette[i * 6 + 1], 'd');
-        list_append(self.undoList, (unitype) self.newColorPalette[i * 6 + 2], 'd');
-        list_append(self.undoList, (unitype) self.newColorPalette[i * 6 + 3], 'd');
-        list_append(self.undoList, (unitype) self.newColorPalette[i * 6 + 4], 'd');
-        list_append(self.undoList, (unitype) self.newColorPalette[i * 6 + 5], 'd');
+    printf("add to undo %d\n", self.saved);
+    while (self.undoList -> length > self.undoIndex) {
+        list_pop(self.undoList);
     }
+    if (self.firstUndo == 1) {
+        for (uint32_t i = 0; i < NUMBER_OF_BOXES; i++) {
+            list_append(self.undoList, (unitype) self.newColorPalette[i * 6 + 0], 'd');
+            list_append(self.undoList, (unitype) self.newColorPalette[i * 6 + 1], 'd');
+            list_append(self.undoList, (unitype) self.newColorPalette[i * 6 + 2], 'd');
+            list_append(self.undoList, (unitype) self.newColorPalette[i * 6 + 3], 'd');
+            list_append(self.undoList, (unitype) self.newColorPalette[i * 6 + 4], 'd');
+            list_append(self.undoList, (unitype) self.newColorPalette[i * 6 + 5], 'd');
+        }
+    }
+    self.firstUndo = 1;
+    self.firstRedo = 1;
+    self.undoIndex = self.undoList -> length;
     self.saved = 0;
 }
 
 void undo() {
-    printf("undo\n");
-    if (self.undoList -> length > 0) {
-        for (int32_t i = NUMBER_OF_BOXES - 1; i >= 0; i--) {
-            self.boxes[i].blueSave = list_pop(self.undoList).d;
-            self.boxes[i].blue = list_pop(self.undoList).d;
-            self.boxes[i].greenSave = list_pop(self.undoList).d;
-            self.boxes[i].green = list_pop(self.undoList).d;
-            self.boxes[i].redSave = list_pop(self.undoList).d;
-            self.boxes[i].red = list_pop(self.undoList).d;
+    // printf("undo %d\n", self.undoIndex);
+    if (self.firstUndo == 1) {
+        for (uint32_t i = 0; i < NUMBER_OF_BOXES; i++) {
+            list_append(self.undoList, (unitype) self.boxes[i].red, 'd');
+            list_append(self.undoList, (unitype) self.boxes[i].redSave, 'd');
+            list_append(self.undoList, (unitype) self.boxes[i].green, 'd');
+            list_append(self.undoList, (unitype) self.boxes[i].greenSave, 'd');
+            list_append(self.undoList, (unitype) self.boxes[i].blue, 'd');
+            list_append(self.undoList, (unitype) self.boxes[i].blueSave, 'd');
         }
+        self.firstUndo = 0;
     }
-    self.saved = -2;
+    if (!self.firstRedo) {
+        self.undoIndex -= 6 * NUMBER_OF_BOXES;
+    }
+    if (self.undoIndex >= 6 * NUMBER_OF_BOXES) {
+        self.firstRedo = 1;
+        for (int32_t i = NUMBER_OF_BOXES - 1; i >= 0; i--) {
+            self.undoIndex--;
+            self.boxes[i].blueSave = self.undoList -> data[self.undoIndex].d;
+            self.undoIndex--;
+            self.boxes[i].blue = self.undoList -> data[self.undoIndex].d;
+            self.undoIndex--;
+            self.boxes[i].greenSave = self.undoList -> data[self.undoIndex].d;
+            self.undoIndex--;
+            self.boxes[i].green = self.undoList -> data[self.undoIndex].d;
+            self.undoIndex--;
+            self.boxes[i].redSave = self.undoList -> data[self.undoIndex].d;
+            self.undoIndex--;
+            self.boxes[i].red = self.undoList -> data[self.undoIndex].d;
+        }
+        self.saved = -2;
+    }
+}
+
+void redo() {
+    // printf("redo %d\n", self.undoIndex);
+    if (self.undoIndex < self.undoList -> length) {
+        if (self.firstRedo == 1) {
+            self.undoIndex += 6 * NUMBER_OF_BOXES;
+            self.firstRedo = 0;
+        }
+        self.undoIndex += 6 * NUMBER_OF_BOXES;
+        for (int32_t i = NUMBER_OF_BOXES - 1; i >= 0; i--) {
+            self.undoIndex--;
+            self.boxes[i].blueSave = self.undoList -> data[self.undoIndex].d;
+            self.undoIndex--;
+            self.boxes[i].blue = self.undoList -> data[self.undoIndex].d;
+            self.undoIndex--;
+            self.boxes[i].greenSave = self.undoList -> data[self.undoIndex].d;
+            self.undoIndex--;
+            self.boxes[i].green = self.undoList -> data[self.undoIndex].d;
+            self.undoIndex--;
+            self.boxes[i].redSave = self.undoList -> data[self.undoIndex].d;
+            self.undoIndex--;
+            self.boxes[i].red = self.undoList -> data[self.undoIndex].d;
+        }
+        self.undoIndex += 6 * NUMBER_OF_BOXES;
+        self.saved = -2;
+    }
 }
 
 void renderBoxes() {
@@ -390,6 +452,16 @@ void mouseTick() {
     } else {
         self.keys[5] = 0;
     }
+    if (turtleKeyPressed(GLFW_KEY_Y)) {
+        if (self.keys[6] == 0) {
+            self.keys[6] = 1;
+            if (self.keys[3]) {
+                redo();
+            }
+        }
+    } else {
+        self.keys[6] = 0;
+    }
     if (self.lockOffsets) {
         for (uint32_t i = 0; i < NUMBER_OF_BOXES; i++) {
             /* this is really bad programming, but im not smart enough to figure out the right way to do it */
@@ -521,11 +593,20 @@ void parseRibbonOutput() {
         if (ribbonRender.output[1] == 0) { // File
             if (ribbonRender.output[2] == 1) { // New
                 strcpy(osFileDialog.selectedFilename, "null");
+                self.saved = -1;
                 for (uint32_t i = 0; i < NUMBER_OF_BOXES; i++) {
                     self.boxes[i].red = randomDouble(0, 255);
                     self.boxes[i].green = randomDouble(0, 255);
                     self.boxes[i].blue = randomDouble(0, 255);
+                    self.newColorPalette[i * 6 + 0] = self.boxes[i].red;
+                    self.newColorPalette[i * 6 + 1] = self.boxes[i].redSave;
+                    self.newColorPalette[i * 6 + 2] = self.boxes[i].green;
+                    self.newColorPalette[i * 6 + 3] = self.boxes[i].greenSave;
+                    self.newColorPalette[i * 6 + 4] = self.boxes[i].blue;
+                    self.newColorPalette[i * 6 + 5] = self.boxes[i].blueSave;
                 }
+                list_clear(self.undoList);
+                self.undoIndex = 0;
             }
             if (ribbonRender.output[2] == 2) { // Save
                 if (strcmp(osFileDialog.selectedFilename, "null") == 0) {
@@ -553,10 +634,10 @@ void parseRibbonOutput() {
         }
         if (ribbonRender.output[1] == 1) { // Edit
             if (ribbonRender.output[2] == 1) { // Undo
-                printf("Undo\n");
+                undo();
             }
             if (ribbonRender.output[2] == 2) { // Redo
-                printf("Redo\n");
+                redo();
             }
             if (ribbonRender.output[2] == 3) { // Cut
                 osClipboardSetText("test123");
