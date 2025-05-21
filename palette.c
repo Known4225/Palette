@@ -16,6 +16,7 @@ typedef struct {
     double y;
     double size;
     int32_t status;
+    int32_t saveStatus;
 } box_t;
 
 /* global state */
@@ -27,10 +28,8 @@ typedef struct {
     box_t boxes[NUMBER_OF_BOXES];
     char lockOffsets;
     char asciiEnum[NUMBER_OF_BOXES][32];
-    double dragColor[3];
-    double savedColor[3];
     uint32_t copyMessage;
-    uint32_t savedBox;
+    int32_t dragBox;
 } palette_t;
 
 palette_t self;
@@ -98,6 +97,7 @@ void init() {
     for (uint32_t i = 0; i < NUMBER_OF_BOXES; i++) {
         self.boxes[i].size = self.boxSize;
         self.boxes[i].status = 0;
+        self.boxes[i].saveStatus = 0;
         self.boxes[i].red = randomDouble(0, 255);
         self.boxes[i].green = randomDouble(0, 255);
         self.boxes[i].blue = randomDouble(0, 255);
@@ -109,7 +109,7 @@ void init() {
     }
 
     self.copyMessage = 0;
-    self.savedBox = 0;
+    self.dragBox = -1;
 }
 
 void addToUndo() {
@@ -168,6 +168,7 @@ void mouseTick() {
                 char rgbStr[48];
                 sprintf(rgbStr, "%d, %d, %d", (int) round(self.boxes[i].red), (int) round(self.boxes[i].green), (int) round(self.boxes[i].blue));
                 osClipboardSetText(rgbStr);
+                self.dragBox = i;
                 self.copyMessage = 255;
             }
         } else if (turtleMouseRight()) {
@@ -176,6 +177,7 @@ void mouseTick() {
                 char hexStr[12];
                 sprintf(hexStr, "#%02X%02X%02X", (int) round(self.boxes[i].red), (int) round(self.boxes[i].green), (int) round(self.boxes[i].blue));
                 osClipboardSetText(hexStr);
+                self.dragBox = i;
                 self.copyMessage = 255;
             }
         } else {
@@ -185,6 +187,7 @@ void mouseTick() {
             } else {
                 self.boxes[i].status = 0;
             }
+            self.dragBox = -1;
         }
         if (self.boxes[i].status == 1) {
             turtlePenColor(self.boxes[i].red, self.boxes[i].green, self.boxes[i].blue);
@@ -202,6 +205,29 @@ void mouseTick() {
             }
             turtleTextWriteString(rgbStr, turtle.mouseX, turtle.mouseY + 5, self.boxes[i].size / 10, 50);
             turtleTextWriteString(hexStr, turtle.mouseX, turtle.mouseY - 5, self.boxes[i].size / 10, 50);
+        }
+        if (self.dragBox >= 0) {
+            if (turtle.mouseX > self.boxes[i].x - self.boxes[i].size * 0.5 && turtle.mouseX < self.boxes[i].x + self.boxes[i].size * 0.5 &&
+                turtle.mouseY > self.boxes[i].y - self.boxes[i].size * 0.5 && turtle.mouseY < self.boxes[i].y + self.boxes[i].size * 0.5) {
+                if (self.boxes[i].saveStatus == 0) {
+                    self.boxes[i].saveStatus = 1;
+                    self.boxes[i].redSave = self.boxes[i].red;
+                    self.boxes[i].greenSave = self.boxes[i].green;
+                    self.boxes[i].blueSave = self.boxes[i].blue;
+                    self.boxes[i].red = self.boxes[self.dragBox].red;
+                    self.boxes[i].green = self.boxes[self.dragBox].green;
+                    self.boxes[i].blue = self.boxes[self.dragBox].blue;
+                }
+            } else {
+                if (self.boxes[i].saveStatus == 1) {
+                    self.boxes[i].red = self.boxes[i].redSave;
+                    self.boxes[i].green = self.boxes[i].greenSave;
+                    self.boxes[i].blue = self.boxes[i].blueSave;
+                }
+                self.boxes[i].saveStatus = 0;
+            }
+        } else {
+            self.boxes[i].saveStatus = 0;
         }
     }
     for (uint32_t i = 0; i < NUMBER_OF_BOXES; i++) {
