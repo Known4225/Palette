@@ -46,6 +46,7 @@ typedef struct {
 } palette_t;
 
 palette_t self;
+tt_popup_t fakePopup;
 
 /* UI variables */
 int32_t buttonVar, switchVar = 0, dropdownVar = 0;
@@ -79,6 +80,19 @@ void init() {
         0.0, 0.0, 0.0,       // override slider circle
     };
     memcpy(self.boxSliderColorsAlt, boxSliderAltCopy, sizeof(boxSliderAltCopy));
+    /* init fakePopup */
+    fakePopup.minX = UIX - 150;
+    fakePopup.minY = UIY - 31;
+    fakePopup.maxX = UIX - 30;
+    fakePopup.maxY = UIY + 9;
+    fakePopup.output[0] = 0;
+    fakePopup.output[1] = -1;
+    fakePopup.mouseDown = 0;
+    fakePopup.style = 0;
+    fakePopup.message = strdup("Are you sure you want to close?");
+    fakePopup.options = list_init();
+    list_append(fakePopup.options, (unitype) strdup("Yes"), 's');
+    list_append(fakePopup.options, (unitype) strdup("No"), 's');
 
     /* setup asciiEnum */
     for (uint32_t i = 0; i < NUMBER_OF_BOXES; i++) {
@@ -291,8 +305,8 @@ void renderBoxes() {
     if (self.copyMessage > 0) {
         self.copyMessage--;
         char copyText[64] = "copied ";
-        osClipboardGetText();
-        memcpy(copyText + 7, osClipboard.text, strlen(osClipboard.text));
+        osToolsClipboardGetText();
+        memcpy(copyText + 7, osToolsClipboard.text, strlen(osToolsClipboard.text));
         if (self.boxes[0].red + self.boxes[0].green + self.boxes[0].blue < 150) {
             turtlePenColorAlpha(255, 255, 255, 255 - self.copyMessage);
         } else {
@@ -317,6 +331,62 @@ void displaySaveIndicator() {
     }
 }
 
+void renderFakePopup() {
+    tt_setColor(TT_COLOR_POPUP_BOX);
+    turtleRectangle(fakePopup.minX, fakePopup.minY, fakePopup.maxX, fakePopup.maxY);
+    double textSize = 5;
+    double textX = fakePopup.minX + (fakePopup.maxX - fakePopup.minX) / 2;
+    double textY = fakePopup.maxY - textSize * 2;
+    tt_setColor(TT_COLOR_TEXT);
+    turtleTextWriteUnicode((unsigned char *) fakePopup.message, textX, textY, textSize, 50);
+    textY -= textSize * 4;
+    double fullLength = 0;
+    for (uint32_t i = 0; i < fakePopup.options -> length; i++) {
+        fullLength += turtleTextGetStringLength(fakePopup.options -> data[i].s, textSize);
+    }
+    /* we have the length of the strings, now we pad with n + 1 padding regions */
+    double padThai = (fakePopup.maxX - fakePopup.minX - fullLength) / (fakePopup.options -> length + 1);
+    textX = fakePopup.minX + padThai;
+    char flagged = 0;
+    if (!turtleMouseDown() && fakePopup.mouseDown == 1) {
+        flagged = 1; // flagged for mouse misbehaviour
+    }
+    for (uint32_t i = 0; i < fakePopup.options -> length; i++) {
+        double strLen = turtleTextGetStringLength(fakePopup.options -> data[i].s, textSize);
+        if (turtle.mouseX > textX - textSize && turtle.mouseX < textX + strLen + textSize &&
+        turtle.mouseY > textY - textSize && turtle.mouseY < textY + textSize) {
+            tt_setColor(TT_COLOR_POPUP_BUTTON_SELECT);
+            turtleRectangle(textX - textSize, textY - textSize, textX + textSize + strLen, textY + textSize);
+            if (turtleMouseDown()) {
+                if (fakePopup.mouseDown == 0) {
+                    fakePopup.mouseDown = 1;
+                    if (fakePopup.output[0] == 0) {
+                        fakePopup.output[1] = i;
+                    }
+                }
+            } else {
+                if (fakePopup.mouseDown == 1) {
+                    fakePopup.mouseDown = 0;
+                    if (fakePopup.output[1] == (int32_t) i) {
+                        fakePopup.output[0] = 1;
+                    }
+                }
+            }
+        } else {
+            tt_setColor(TT_COLOR_POPUP_BUTTON);
+            turtleRectangle(textX - textSize, textY - textSize, textX + textSize + strLen, textY + textSize);
+        }
+        tt_setColor(TT_COLOR_TEXT);
+        turtleTextWriteUnicode((unsigned char *) fakePopup.options -> data[i].s, textX, textY, textSize, 0);
+        textX += strLen + padThai;
+    }
+    if (!turtleMouseDown() && fakePopup.mouseDown == 1 && flagged == 1) {
+        fakePopup.mouseDown = 0;
+        fakePopup.output[0] = 0;
+        fakePopup.output[1] = -1;
+    }
+}
+
 void mouseTick() {
     /* mouse */
     for (uint32_t i = 0; i < NUMBER_OF_BOXES; i++) {
@@ -325,7 +395,7 @@ void mouseTick() {
                 self.boxes[i].status *= -1;
                 char rgbStr[48];
                 sprintf(rgbStr, "%d, %d, %d", (int) round(self.boxes[i].red), (int) round(self.boxes[i].green), (int) round(self.boxes[i].blue));
-                osClipboardSetText(rgbStr);
+                osToolsClipboardSetText(rgbStr);
                 self.dragBox = i;
                 self.copyMessage = 255;
             }
@@ -334,7 +404,7 @@ void mouseTick() {
                 self.boxes[i].status *= -1;
                 char hexStr[12];
                 sprintf(hexStr, "#%02X%02X%02X", (int) round(self.boxes[i].red), (int) round(self.boxes[i].green), (int) round(self.boxes[i].blue));
-                osClipboardSetText(hexStr);
+                osToolsClipboardSetText(hexStr);
                 self.dragBox = i;
                 self.copyMessage = 255;
             }
@@ -347,7 +417,7 @@ void mouseTick() {
             }
             if (self.dragBox != -1) {
                 self.dragBox = -1;
-                // addToUndo();
+                addToUndo();
             }
         }
         if (self.boxes[i].status == 1) {
@@ -428,14 +498,14 @@ void mouseTick() {
         if (self.keys[4] == 0) {
             self.keys[4] = 1;
             if (self.keys[3]) {
-                if (strcmp(osFileDialog.selectedFilename, "null") == 0) {
-                    if (osFileDialogPrompt(1, "") != -1) {
-                        printf("Saved to: %s\n", osFileDialog.selectedFilename);
-                        export(osFileDialog.selectedFilename);
+                if (strcmp(osToolsFileDialog.selectedFilename, "null") == 0) {
+                    if (osToolsFileDialogPrompt(1, "") != -1) {
+                        printf("Saved to: %s\n", osToolsFileDialog.selectedFilename);
+                        export(osToolsFileDialog.selectedFilename);
                     }
                 } else {
-                    printf("Saved to: %s\n", osFileDialog.selectedFilename);
-                    export(osFileDialog.selectedFilename);
+                    printf("Saved to: %s\n", osToolsFileDialog.selectedFilename);
+                    export(osToolsFileDialog.selectedFilename);
                 }
             }
         }
@@ -592,7 +662,7 @@ void parseRibbonOutput() {
         ribbonRender.output[0] = 0;
         if (ribbonRender.output[1] == 0) { // File
             if (ribbonRender.output[2] == 1) { // New
-                strcpy(osFileDialog.selectedFilename, "null");
+                strcpy(osToolsFileDialog.selectedFilename, "null");
                 self.saved = -1;
                 for (uint32_t i = 0; i < NUMBER_OF_BOXES; i++) {
                     self.boxes[i].red = randomDouble(0, 255);
@@ -609,26 +679,26 @@ void parseRibbonOutput() {
                 self.undoIndex = 0;
             }
             if (ribbonRender.output[2] == 2) { // Save
-                if (strcmp(osFileDialog.selectedFilename, "null") == 0) {
-                    if (osFileDialogPrompt(1, "") != -1) {
-                        printf("Saved to: %s\n", osFileDialog.selectedFilename);
-                        export(osFileDialog.selectedFilename);
+                if (strcmp(osToolsFileDialog.selectedFilename, "null") == 0) {
+                    if (osToolsFileDialogPrompt(1, "") != -1) {
+                        printf("Saved to: %s\n", osToolsFileDialog.selectedFilename);
+                        export(osToolsFileDialog.selectedFilename);
                     }
                 } else {
-                    printf("Saved to: %s\n", osFileDialog.selectedFilename);
-                    export(osFileDialog.selectedFilename);
+                    printf("Saved to: %s\n", osToolsFileDialog.selectedFilename);
+                    export(osToolsFileDialog.selectedFilename);
                 }
             }
             if (ribbonRender.output[2] == 3) { // Save As...
-                if (osFileDialogPrompt(1, "") != -1) {
-                    printf("Saved to: %s\n", osFileDialog.selectedFilename);
-                    export(osFileDialog.selectedFilename);
+                if (osToolsFileDialogPrompt(1, "") != -1) {
+                    printf("Saved to: %s\n", osToolsFileDialog.selectedFilename);
+                    export(osToolsFileDialog.selectedFilename);
                 }
             }
             if (ribbonRender.output[2] == 4) { // Open
-                if (osFileDialogPrompt(0, "") != -1) {
-                    printf("Loaded data from: %s\n", osFileDialog.selectedFilename);
-                    import(osFileDialog.selectedFilename);
+                if (osToolsFileDialogPrompt(0, "") != -1) {
+                    printf("Loaded data from: %s\n", osToolsFileDialog.selectedFilename);
+                    import(osToolsFileDialog.selectedFilename);
                 }
             }
         }
@@ -640,16 +710,16 @@ void parseRibbonOutput() {
                 redo();
             }
             if (ribbonRender.output[2] == 3) { // Cut
-                osClipboardSetText("test123");
+                osToolsClipboardSetText("test123");
                 printf("Cut \"test123\" to clipboard!\n");
             }
             if (ribbonRender.output[2] == 4) { // Copy
-                osClipboardSetText("test345");
+                osToolsClipboardSetText("test345");
                 printf("Copied \"test345\" to clipboard!\n");
             }
             if (ribbonRender.output[2] == 5) { // Paste
-                osClipboardGetText();
-                printf("Pasted \"%s\" from clipboard!\n", osClipboard.text);
+                osToolsClipboardGetText();
+                printf("Pasted \"%s\" from clipboard!\n", osToolsClipboard.text);
             }
         }
         if (ribbonRender.output[1] == 2) { // View
@@ -674,14 +744,14 @@ void parsePopupOutput(GLFWwindow *window) {
     if (popup.output[0] == 1) {
         popup.output[0] = 0; // untoggle
         if (popup.output[1] == 0) { // save
-            if (strcmp(osFileDialog.selectedFilename, "null") == 0) {
-                if (osFileDialogPrompt(1, "") != -1) {
-                    printf("Saved to: %s\n", osFileDialog.selectedFilename);
-                    export(osFileDialog.selectedFilename);
+            if (strcmp(osToolsFileDialog.selectedFilename, "null") == 0) {
+                if (osToolsFileDialogPrompt(1, "") != -1) {
+                    printf("Saved to: %s\n", osToolsFileDialog.selectedFilename);
+                    export(osToolsFileDialog.selectedFilename);
                 }
             } else {
-                printf("Saved to: %s\n", osFileDialog.selectedFilename);
-                export(osFileDialog.selectedFilename);
+                printf("Saved to: %s\n", osToolsFileDialog.selectedFilename);
+                export(osToolsFileDialog.selectedFilename);
             }
             turtle.close = 0;
             glfwSetWindowShouldClose(window, 0);
@@ -713,18 +783,26 @@ int main(int argc, char *argv[]) {
     }
     glfwMakeContextCurrent(window);
     glfwSetWindowSizeLimits(window, windowHeight * 16 / 9, windowHeight, windowHeight * 16 / 9, windowHeight);
+    char constructedPath[4097 + 32];
 
+    /* initialise osTools */
+    osToolsInit(argv[0], window); // must include argv[0] to get executableFilepath, must include GLFW window
+    osToolsFileDialogAddExtension("txt"); // add txt to extension restrictions
+    osToolsFileDialogAddExtension("pal"); // add pal to extension restrictions
     /* initialize turtle */
     turtleInit(window, -320, -180, 320, 180);
     /* initialise turtleText */
-    turtleTextInit("include/fontBez.tgl");
+    strcpy(constructedPath, osToolsFileDialog.executableFilepath);
+    strcat(constructedPath, "include/fontBez.tgl");
+    turtleTextInit(constructedPath);
     /* initialise turtleTools ribbon */
-    ribbonInit("include/ribbonConfig.txt");
+    strcpy(constructedPath, osToolsFileDialog.executableFilepath);
+    strcat(constructedPath, "include/ribbonConfig.txt");
+    ribbonInit(constructedPath);
     /* initialise turtleTools popup */
-    popupInit("include/popupConfig.txt", -60, -20, 60, 20);
-    /* initialise osTools */
-    osToolsInit(argv[0], window); // must include argv[0] to get executableFilepath, must include GLFW window
-    osFileDialogAddExtension("txt"); // add txt to extension restrictions
+    strcpy(constructedPath, osToolsFileDialog.executableFilepath);
+    strcat(constructedPath, "include/popupConfig.txt");
+    popupInit(constructedPath, -60, -20, 60, 20);
 
     uint32_t tps = 120; // ticks per second (locked to fps in this case)
     uint64_t tick = 0; // count number of ticks since application started
@@ -734,19 +812,22 @@ int main(int argc, char *argv[]) {
 
     init();
     if (argc > 1) {
-        import(argv[1]);
+        strcpy(osToolsFileDialog.selectedFilename, argv[1]);
+        import(osToolsFileDialog.selectedFilename);
     }
+
 
     while (turtle.shouldClose == 0) {
         start = clock();
         turtleGetMouseCoords();
         turtleClear();
         renderBoxes();
-        char coordsStr[16];
+        char coordsStr[24];
         sprintf(coordsStr, "%.2lf, %.2lf", turtle.mouseX, turtle.mouseY);
         tt_setColor(TT_COLOR_TEXT);
         turtleTextWriteString(coordsStr, -310, -170, 5, 0);
         turtleToolsUpdateUI(); // update turtleTools UI elements
+        renderFakePopup();
         mouseTick();
         /* override popup if saved */
         if (turtle.close == 1 && self.saved == 1) {
