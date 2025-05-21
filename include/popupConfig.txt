@@ -1,3 +1,4 @@
-Are you sure you want to close?
+Warning: Unsaved Changes
+Save
 Cancel
 Close

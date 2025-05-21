@@ -4,6 +4,9 @@
 
 #define NUMBER_OF_BOXES 23
 
+void export(const char *filename);
+void import(const char *filename);
+
 /* box */
 typedef struct {
     double red;
@@ -27,12 +30,15 @@ typedef struct {
     double topX;
     double topY;
     box_t boxes[NUMBER_OF_BOXES];
+    double newColorPalette[NUMBER_OF_BOXES * 3];
     char lockOffsets;
     char asciiEnum[NUMBER_OF_BOXES][32];
     double boxSliderColors[9];
     double boxSliderColorsAlt[9];
+    int8_t keys[10];
     uint32_t copyMessage;
     int32_t dragBox;
+    int32_t saved;
 } palette_t;
 
 palette_t self;
@@ -116,6 +122,11 @@ void init() {
         self.boxes[i].red = randomDouble(0, 255);
         self.boxes[i].green = randomDouble(0, 255);
         self.boxes[i].blue = randomDouble(0, 255);
+        if (i != 0) {
+            self.newColorPalette[i * 3 - 3] = self.boxes[i].red;
+            self.newColorPalette[i * 3 - 2] = self.boxes[i].green;
+            self.newColorPalette[i * 3 - 1] = self.boxes[i].blue;
+        }
         self.boxes[i].x = self.topX + self.boxSize * (i % self.width) * 1.05;
         self.boxes[i].y = self.topY - self.boxSize * (i / self.width) * 1.05;
         self.boxes[i].sliders[0] = sliderInit("", &(self.boxes[i].red), TT_SLIDER_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, self.boxes[i].x, self.boxes[i].y + 20, 5, self.boxSize * 0.8, 0, 255, 0);
@@ -128,10 +139,13 @@ void init() {
 
     self.copyMessage = 0;
     self.dragBox = -1;
+    self.saved = 1;
+    memset(self.keys, 0, sizeof(self.keys));
 }
 
 void addToUndo() {
-
+    printf("addToUndo\n");
+    self.saved = 0;
 }
 
 void renderBoxes() {
@@ -161,13 +175,24 @@ void renderBoxes() {
         turtleTextWriteString(hexStr, self.boxes[i].x, self.boxes[i].y - 20, self.boxes[i].size / 10, 50);
     }
     /* set color palette */
-    double newColorPalette[NUMBER_OF_BOXES * 3];
+    double setColorPalette[NUMBER_OF_BOXES * 3]; // this is so terrible
     for (uint32_t i = 0; i < NUMBER_OF_BOXES - 1; i++) {
-        newColorPalette[i * 3 + 0] = self.boxes[i + 1].red;
-        newColorPalette[i * 3 + 1] = self.boxes[i + 1].green;
-        newColorPalette[i * 3 + 2] = self.boxes[i + 1].blue;
+        if (!turtleMouseDown() && (fabs(self.newColorPalette[i * 3 + 0] - self.boxes[i + 1].red) > 0.5 || fabs(self.newColorPalette[i * 3 + 1] - self.boxes[i + 1].green) > 0.5 || fabs(self.newColorPalette[i * 3 + 2] - self.boxes[i + 1].blue)) > 0.5) {
+            if (self.saved != -1) {
+                addToUndo();
+            }
+            self.newColorPalette[i * 3 + 0] = self.boxes[i + 1].red;
+            self.newColorPalette[i * 3 + 1] = self.boxes[i + 1].green;
+            self.newColorPalette[i * 3 + 2] = self.boxes[i + 1].blue;
+        }
+        setColorPalette[i * 3 + 0] = self.boxes[i + 1].red;
+        setColorPalette[i * 3 + 1] = self.boxes[i + 1].green;
+        setColorPalette[i * 3 + 2] = self.boxes[i + 1].blue;
     }
-    memcpy(tt_themeColors, newColorPalette, sizeof(tt_themeColors));
+    if (self.saved == -1) {
+        self.saved = 1;
+    }
+    memcpy(tt_themeColors, setColorPalette, sizeof(tt_themeColors));
     /* display copy message */
     if (self.copyMessage > 0) {
         self.copyMessage--;
@@ -180,6 +205,21 @@ void renderBoxes() {
             turtlePenColorAlpha(0, 0, 0, 255 - self.copyMessage);
         }
         turtleTextWriteString(copyText, self.topX + self.boxSize * self.width + 5, 160, 8, 0);
+    }
+}
+
+void displaySaveIndicator() {
+    /* display saved indicator */
+    if (self.saved == 0) {
+        if (self.boxes[3].red + self.boxes[3].green + self.boxes[3].blue < 382.5) {
+            turtlePenColor(230, 230, 230);
+        } else {
+            turtlePenColor(10, 10, 10);
+        }
+        turtlePenSize(5);
+        turtleGoto(310, 175);
+        turtlePenDown();
+        turtlePenUp();
     }
 }
 
@@ -206,12 +246,15 @@ void mouseTick() {
             }
         } else {
             if (turtle.mouseX > self.boxes[i].x - self.boxes[i].size * 0.5 && turtle.mouseX < self.boxes[i].x + self.boxes[i].size * 0.5 &&
-                turtle.mouseY > self.boxes[i].y - self.boxes[i].size * 0.5 && turtle.mouseY < self.boxes[i].y - self.boxes[i].size * 0.1) {
+                turtle.mouseY > self.boxes[i].y - self.boxes[i].size * 0.5 && turtle.mouseY < self.boxes[i].y - self.boxes[i].size * 0.05) {
                 self.boxes[i].status = -1;
             } else {
                 self.boxes[i].status = 0;
             }
-            self.dragBox = -1;
+            if (self.dragBox != -1) {
+                self.dragBox = -1;
+                // addToUndo();
+            }
         }
         if (self.boxes[i].status == 1) {
             turtlePenColor(self.boxes[i].red, self.boxes[i].green, self.boxes[i].blue);
@@ -279,6 +322,31 @@ void mouseTick() {
         }
     } else {
         self.lockOffsets = 0;
+    }
+    if (turtleKeyPressed(GLFW_KEY_LEFT_CONTROL)) {
+        if (self.keys[3] == 0) {
+            self.keys[3] = 1;
+        }
+    } else {
+        self.keys[3] = 0;
+    }
+    if (turtleKeyPressed(GLFW_KEY_S)) {
+        if (self.keys[4] == 0) {
+            self.keys[4] = 1;
+            if (self.keys[3]) {
+                if (strcmp(osFileDialog.selectedFilename, "null") == 0) {
+                    if (osFileDialogPrompt(1, "") != -1) {
+                        printf("Saved to: %s\n", osFileDialog.selectedFilename);
+                        export(osFileDialog.selectedFilename);
+                    }
+                } else {
+                    printf("Saved to: %s\n", osFileDialog.selectedFilename);
+                    export(osFileDialog.selectedFilename);
+                }
+            }
+        }
+    } else {
+        self.keys[4] = 0;
     }
     if (self.lockOffsets) {
         for (uint32_t i = 0; i < NUMBER_OF_BOXES; i++) {
@@ -351,6 +419,7 @@ void mouseTick() {
 }
 
 void export(const char *filename) {
+    self.saved = 1;
     FILE *fp = fopen(filename, "w");
     char messages[][64] = {
         "// text color (0)",
@@ -390,6 +459,7 @@ void export(const char *filename) {
 }
 
 void import(const char *filename) {
+    self.saved = -1;
     FILE *fp = fopen(filename, "r");
     for (uint32_t i = 0; i < NUMBER_OF_BOXES - 1; i++) {
         char line[128];
@@ -480,11 +550,24 @@ void parseRibbonOutput() {
 void parsePopupOutput(GLFWwindow *window) {
     if (popup.output[0] == 1) {
         popup.output[0] = 0; // untoggle
-        if (popup.output[1] == 0) { // cancel
+        if (popup.output[1] == 0) { // save
+            if (strcmp(osFileDialog.selectedFilename, "null") == 0) {
+                if (osFileDialogPrompt(1, "") != -1) {
+                    printf("Saved to: %s\n", osFileDialog.selectedFilename);
+                    export(osFileDialog.selectedFilename);
+                }
+            } else {
+                printf("Saved to: %s\n", osFileDialog.selectedFilename);
+                export(osFileDialog.selectedFilename);
+            }
             turtle.close = 0;
             glfwSetWindowShouldClose(window, 0);
         }
-        if (popup.output[1] == 1) { // close
+        if (popup.output[1] == 1) { // cancel
+            turtle.close = 0;
+            glfwSetWindowShouldClose(window, 0);
+        }
+        if (popup.output[1] == 2) { // close
             turtle.shouldClose = 1;
         }
     }
@@ -542,7 +625,15 @@ int main(int argc, char *argv[]) {
         turtleTextWriteString(coordsStr, -310, -170, 5, 0);
         turtleToolsUpdateUI(); // update turtleTools UI elements
         mouseTick();
+        /* override popup if saved */
+        if (turtle.close == 1 && self.saved == 1) {
+            turtle.shouldClose = 1;
+            turtleFree();
+            glfwTerminate();
+            return 0;
+        }
         turtleToolsUpdateRibbonPopup(); // update turtleTools ribbon and popup
+        displaySaveIndicator();
         parseRibbonOutput(); // user defined function to use ribbon
         parsePopupOutput(window); // user defined function to use popup
         turtleUpdate(); // update the screen
