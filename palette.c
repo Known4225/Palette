@@ -30,11 +30,12 @@ typedef struct {
     double topX;
     double topY;
     box_t boxes[NUMBER_OF_BOXES];
-    double newColorPalette[NUMBER_OF_BOXES * 3];
+    double newColorPalette[NUMBER_OF_BOXES * 6];
     char lockOffsets;
     char asciiEnum[NUMBER_OF_BOXES][32];
     double boxSliderColors[9];
     double boxSliderColorsAlt[9];
+    list_t *undoList;
     int8_t keys[10];
     uint32_t copyMessage;
     int32_t dragBox;
@@ -122,11 +123,12 @@ void init() {
         self.boxes[i].red = randomDouble(0, 255);
         self.boxes[i].green = randomDouble(0, 255);
         self.boxes[i].blue = randomDouble(0, 255);
-        if (i != 0) {
-            self.newColorPalette[i * 3 - 3] = self.boxes[i].red;
-            self.newColorPalette[i * 3 - 2] = self.boxes[i].green;
-            self.newColorPalette[i * 3 - 1] = self.boxes[i].blue;
-        }
+        self.newColorPalette[i * 6 + 0] = self.boxes[i].red;
+        self.newColorPalette[i * 6 + 1] = self.boxes[i].redSave;
+        self.newColorPalette[i * 6 + 2] = self.boxes[i].green;
+        self.newColorPalette[i * 6 + 3] = self.boxes[i].greenSave;
+        self.newColorPalette[i * 6 + 4] = self.boxes[i].blue;
+        self.newColorPalette[i * 6 + 5] = self.boxes[i].blueSave;
         self.boxes[i].x = self.topX + self.boxSize * (i % self.width) * 1.05;
         self.boxes[i].y = self.topY - self.boxSize * (i / self.width) * 1.05;
         self.boxes[i].sliders[0] = sliderInit("", &(self.boxes[i].red), TT_SLIDER_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, self.boxes[i].x, self.boxes[i].y + 20, 5, self.boxSize * 0.8, 0, 255, 0);
@@ -137,6 +139,7 @@ void init() {
         tt_colorOverride((void *) self.boxes[i].sliders[2], self.boxSliderColors, 9);
     }
 
+    self.undoList = list_init();
     self.copyMessage = 0;
     self.dragBox = -1;
     self.saved = 1;
@@ -145,7 +148,30 @@ void init() {
 
 void addToUndo() {
     printf("addToUndo\n");
+    for (uint32_t i = 0; i < NUMBER_OF_BOXES; i++) {
+        list_append(self.undoList, (unitype) self.newColorPalette[i * 6 + 0], 'd');
+        list_append(self.undoList, (unitype) self.newColorPalette[i * 6 + 1], 'd');
+        list_append(self.undoList, (unitype) self.newColorPalette[i * 6 + 2], 'd');
+        list_append(self.undoList, (unitype) self.newColorPalette[i * 6 + 3], 'd');
+        list_append(self.undoList, (unitype) self.newColorPalette[i * 6 + 4], 'd');
+        list_append(self.undoList, (unitype) self.newColorPalette[i * 6 + 5], 'd');
+    }
     self.saved = 0;
+}
+
+void undo() {
+    printf("undo\n");
+    if (self.undoList -> length > 0) {
+        for (int32_t i = NUMBER_OF_BOXES - 1; i >= 0; i--) {
+            self.boxes[i].blueSave = list_pop(self.undoList).d;
+            self.boxes[i].blue = list_pop(self.undoList).d;
+            self.boxes[i].greenSave = list_pop(self.undoList).d;
+            self.boxes[i].green = list_pop(self.undoList).d;
+            self.boxes[i].redSave = list_pop(self.undoList).d;
+            self.boxes[i].red = list_pop(self.undoList).d;
+        }
+    }
+    self.saved = -2;
 }
 
 void renderBoxes() {
@@ -176,23 +202,29 @@ void renderBoxes() {
     }
     /* set color palette */
     double setColorPalette[NUMBER_OF_BOXES * 3]; // this is so terrible
-    for (uint32_t i = 0; i < NUMBER_OF_BOXES - 1; i++) {
-        if (!turtleMouseDown() && (fabs(self.newColorPalette[i * 3 + 0] - self.boxes[i + 1].red) > 0.5 || fabs(self.newColorPalette[i * 3 + 1] - self.boxes[i + 1].green) > 0.5 || fabs(self.newColorPalette[i * 3 + 2] - self.boxes[i + 1].blue)) > 0.5) {
-            if (self.saved != -1) {
+    for (uint32_t i = 0; i < NUMBER_OF_BOXES; i++) {
+        if (!turtleMouseDown() && (fabs(self.newColorPalette[i * 6 + 0] - self.boxes[i].red) > 0.5 || fabs(self.newColorPalette[i * 6 + 2] - self.boxes[i].green) > 0.5 || fabs(self.newColorPalette[i * 6 + 4] - self.boxes[i].blue)) > 0.5) {
+            if (self.saved >= 0) {
                 addToUndo();
             }
-            self.newColorPalette[i * 3 + 0] = self.boxes[i + 1].red;
-            self.newColorPalette[i * 3 + 1] = self.boxes[i + 1].green;
-            self.newColorPalette[i * 3 + 2] = self.boxes[i + 1].blue;
+            self.newColorPalette[i * 6 + 0] = self.boxes[i].red;
+            self.newColorPalette[i * 6 + 1] = self.boxes[i].redSave;
+            self.newColorPalette[i * 6 + 2] = self.boxes[i].green;
+            self.newColorPalette[i * 6 + 3] = self.boxes[i].greenSave;
+            self.newColorPalette[i * 6 + 4] = self.boxes[i].blue;
+            self.newColorPalette[i * 6 + 5] = self.boxes[i].blueSave;
         }
-        setColorPalette[i * 3 + 0] = self.boxes[i + 1].red;
-        setColorPalette[i * 3 + 1] = self.boxes[i + 1].green;
-        setColorPalette[i * 3 + 2] = self.boxes[i + 1].blue;
+        setColorPalette[i * 3 + 0] = self.boxes[i].red;
+        setColorPalette[i * 3 + 1] = self.boxes[i].green;
+        setColorPalette[i * 3 + 2] = self.boxes[i].blue;
     }
     if (self.saved == -1) {
         self.saved = 1;
     }
-    memcpy(tt_themeColors, setColorPalette, sizeof(tt_themeColors));
+    if (self.saved == -2) {
+        self.saved = 0;
+    }
+    memcpy(tt_themeColors, setColorPalette + 3, sizeof(tt_themeColors));
     /* display copy message */
     if (self.copyMessage > 0) {
         self.copyMessage--;
@@ -347,6 +379,16 @@ void mouseTick() {
         }
     } else {
         self.keys[4] = 0;
+    }
+    if (turtleKeyPressed(GLFW_KEY_Z)) {
+        if (self.keys[5] == 0) {
+            self.keys[5] = 1;
+            if (self.keys[3]) {
+                undo();
+            }
+        }
+    } else {
+        self.keys[5] = 0;
     }
     if (self.lockOffsets) {
         for (uint32_t i = 0; i < NUMBER_OF_BOXES; i++) {
