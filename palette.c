@@ -354,7 +354,7 @@ void export(const char *filename) {
     };
     for (uint32_t i = 0; i < NUMBER_OF_BOXES - 1; i++) {
         char line[128];
-        sprintf(line, "%0.1lf, %0.1lf, %0.1lf,", self.boxes[i + 1].red, self.boxes[i + 1].green, self.boxes[i + 2].blue);
+        sprintf(line, "%0.1lf, %0.1lf, %0.1lf,", self.boxes[i + 1].red, self.boxes[i + 1].green, self.boxes[i + 1].blue);
         while (strlen(line) < 21) {
             strcat(line, " ");
         }
