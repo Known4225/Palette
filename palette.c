@@ -153,7 +153,7 @@ void init() {
 }
 
 void addToUndo() {
-    printf("add to undo %d\n", self.saved);
+    // printf("add to undo %d\n", self.saved);
     while (self.undoList -> length > self.undoIndex) {
         list_pop(self.undoList);
     }
