@@ -17,6 +17,7 @@ typedef struct {
     double size;
     int32_t status;
     int32_t saveStatus;
+    tt_slider_t *sliders[3];
 } box_t;
 
 /* global state */
@@ -28,6 +29,8 @@ typedef struct {
     box_t boxes[NUMBER_OF_BOXES];
     char lockOffsets;
     char asciiEnum[NUMBER_OF_BOXES][32];
+    double boxSliderColors[9];
+    double boxSliderColorsAlt[9];
     uint32_t copyMessage;
     int32_t dragBox;
 } palette_t;
@@ -54,6 +57,18 @@ void init() {
     sliderInit("slider", &sliderVar, TT_SLIDER_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, UIX, UIY - 120, 10, 50, 0, 10, 1);
     sliderInit("slider", &sliderVar, TT_SLIDER_VERTICAL, TT_SLIDER_ALIGN_CENTER, UIX - 50, UIY - 120, 10, 50, 0, 10, 1);
     dropdownInit("dropdown", dropdownOptions, &dropdownVar, TT_DROPDOWN_ALIGN_CENTER, UIX, UIY - 165, 10);
+    double boxSliderCopy[] = {
+        0.0, 0.0, 0.0,       // override slider text
+        0.0, 0.0, 0.0,       // override slider bar
+        255.0, 255.0, 255.0, // override slider circle
+    };
+    memcpy(self.boxSliderColors, boxSliderCopy, sizeof(boxSliderCopy));
+    double boxSliderAltCopy[] = {
+        0.0, 0.0, 0.0,       // override slider text
+        255.0, 255.0, 255.0, // override slider bar
+        0.0, 0.0, 0.0,       // override slider circle
+    };
+    memcpy(self.boxSliderColorsAlt, boxSliderAltCopy, sizeof(boxSliderAltCopy));
 
     /* setup asciiEnum */
     for (uint32_t i = 0; i < NUMBER_OF_BOXES; i++) {
@@ -103,9 +118,12 @@ void init() {
         self.boxes[i].blue = randomDouble(0, 255);
         self.boxes[i].x = self.topX + self.boxSize * (i % self.width) * 1.05;
         self.boxes[i].y = self.topY - self.boxSize * (i / self.width) * 1.05;
-        sliderInit("", &(self.boxes[i].red), TT_SLIDER_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, self.boxes[i].x, self.boxes[i].y + 20, 5, self.boxSize * 0.8, 0, 255, 0);
-        sliderInit("", &(self.boxes[i].green), TT_SLIDER_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, self.boxes[i].x, self.boxes[i].y + 10, 5, self.boxSize * 0.8, 0, 255, 0);
-        sliderInit("", &(self.boxes[i].blue), TT_SLIDER_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, self.boxes[i].x, self.boxes[i].y, 5, self.boxSize * 0.8, 0, 255, 0);
+        self.boxes[i].sliders[0] = sliderInit("", &(self.boxes[i].red), TT_SLIDER_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, self.boxes[i].x, self.boxes[i].y + 20, 5, self.boxSize * 0.8, 0, 255, 0);
+        self.boxes[i].sliders[1] = sliderInit("", &(self.boxes[i].green), TT_SLIDER_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, self.boxes[i].x, self.boxes[i].y + 10, 5, self.boxSize * 0.8, 0, 255, 0);
+        self.boxes[i].sliders[2] = sliderInit("", &(self.boxes[i].blue), TT_SLIDER_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, self.boxes[i].x, self.boxes[i].y, 5, self.boxSize * 0.8, 0, 255, 0);
+        tt_colorOverride((void *) self.boxes[i].sliders[0], self.boxSliderColors, 9);
+        tt_colorOverride((void *) self.boxes[i].sliders[1], self.boxSliderColors, 9);
+        tt_colorOverride((void *) self.boxes[i].sliders[2], self.boxSliderColors, 9);
     }
 
     self.copyMessage = 0;
@@ -130,8 +148,14 @@ void renderBoxes() {
         sprintf(hexStr, "#%02X%02X%02X", (int) round(self.boxes[i].red), (int) round(self.boxes[i].green), (int) round(self.boxes[i].blue));
         if (self.boxes[i].red + self.boxes[i].green + self.boxes[i].blue < 150) {
             turtlePenColor(255, 255, 255);
+            tt_colorOverride((void *) self.boxes[i].sliders[0], self.boxSliderColorsAlt, 9);
+            tt_colorOverride((void *) self.boxes[i].sliders[1], self.boxSliderColorsAlt, 9);
+            tt_colorOverride((void *) self.boxes[i].sliders[2], self.boxSliderColorsAlt, 9);
         } else {
             turtlePenColor(0, 0, 0);
+            tt_colorOverride((void *) self.boxes[i].sliders[0], self.boxSliderColors, 9);
+            tt_colorOverride((void *) self.boxes[i].sliders[1], self.boxSliderColors, 9);
+            tt_colorOverride((void *) self.boxes[i].sliders[2], self.boxSliderColors, 9);
         }
         turtleTextWriteString(rgbStr, self.boxes[i].x, self.boxes[i].y - 10, self.boxes[i].size / 10, 50);
         turtleTextWriteString(hexStr, self.boxes[i].x, self.boxes[i].y - 20, self.boxes[i].size / 10, 50);
