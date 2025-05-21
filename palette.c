@@ -15,6 +15,7 @@ typedef struct {
     double x;
     double y;
     double size;
+    int32_t status;
 } box_t;
 
 /* global state */
@@ -26,6 +27,10 @@ typedef struct {
     box_t boxes[NUMBER_OF_BOXES];
     char lockOffsets;
     char asciiEnum[NUMBER_OF_BOXES][32];
+    double dragColor[3];
+    double savedColor[3];
+    uint32_t copyMessage;
+    uint32_t savedBox;
 } palette_t;
 
 palette_t self;
@@ -92,6 +97,7 @@ void init() {
     self.topY = 160 - self.boxSize * 0.5;
     for (uint32_t i = 0; i < NUMBER_OF_BOXES; i++) {
         self.boxes[i].size = self.boxSize;
+        self.boxes[i].status = 0;
         self.boxes[i].red = randomDouble(0, 255);
         self.boxes[i].green = randomDouble(0, 255);
         self.boxes[i].blue = randomDouble(0, 255);
@@ -101,12 +107,19 @@ void init() {
         sliderInit("", &(self.boxes[i].green), TT_SLIDER_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, self.boxes[i].x, self.boxes[i].y + 10, 5, self.boxSize * 0.8, 0, 255, 0);
         sliderInit("", &(self.boxes[i].blue), TT_SLIDER_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, self.boxes[i].x, self.boxes[i].y, 5, self.boxSize * 0.8, 0, 255, 0);
     }
+
+    self.copyMessage = 0;
+    self.savedBox = 0;
+}
+
+void addToUndo() {
+
 }
 
 void renderBoxes() {
     /* render background */
     turtlePenColor(self.boxes[0].red, self.boxes[0].green, self.boxes[0].blue);
-    turtleRectangle(self. topX + self.boxSize * self.width, -180, 320, 180);
+    turtleRectangle(self.topX + self.boxSize * self.width, -180, 320, 180);
     /* render boxes */
     for (uint32_t i = 0; i < NUMBER_OF_BOXES; i++) {
         turtlePenColor(self.boxes[i].red, self.boxes[i].green, self.boxes[i].blue);
@@ -131,10 +144,66 @@ void renderBoxes() {
         newColorPalette[i * 3 + 2] = self.boxes[i + 1].blue;
     }
     memcpy(tt_themeColors, newColorPalette, sizeof(tt_themeColors));
+    /* display copy message */
+    if (self.copyMessage > 0) {
+        self.copyMessage--;
+        char copyText[64] = "copied ";
+        osClipboardGetText();
+        memcpy(copyText + 7, osClipboard.text, strlen(osClipboard.text));
+        if (self.boxes[0].red + self.boxes[0].green + self.boxes[0].blue < 150) {
+            turtlePenColorAlpha(255, 255, 255, 255 - self.copyMessage);
+        } else {
+            turtlePenColorAlpha(0, 0, 0, 255 - self.copyMessage);
+        }
+        turtleTextWriteString(copyText, self.topX + self.boxSize * self.width + 5, 160, 8, 0);
+    }
 }
 
 void mouseTick() {
     /* mouse */
+    for (uint32_t i = 0; i < NUMBER_OF_BOXES; i++) {
+        if (turtleMouseDown()) {
+            if (self.boxes[i].status < 0) {
+                self.boxes[i].status *= -1;
+                char rgbStr[48];
+                sprintf(rgbStr, "%d, %d, %d", (int) round(self.boxes[i].red), (int) round(self.boxes[i].green), (int) round(self.boxes[i].blue));
+                osClipboardSetText(rgbStr);
+                self.copyMessage = 255;
+            }
+        } else if (turtleMouseRight()) {
+            if (self.boxes[i].status < 0) {
+                self.boxes[i].status *= -1;
+                char hexStr[12];
+                sprintf(hexStr, "#%02X%02X%02X", (int) round(self.boxes[i].red), (int) round(self.boxes[i].green), (int) round(self.boxes[i].blue));
+                osClipboardSetText(hexStr);
+                self.copyMessage = 255;
+            }
+        } else {
+            if (turtle.mouseX > self.boxes[i].x - self.boxes[i].size * 0.5 && turtle.mouseX < self.boxes[i].x + self.boxes[i].size * 0.5 &&
+                turtle.mouseY > self.boxes[i].y - self.boxes[i].size * 0.5 && turtle.mouseY < self.boxes[i].y - self.boxes[i].size * 0.1) {
+                self.boxes[i].status = -1;
+            } else {
+                self.boxes[i].status = 0;
+            }
+        }
+        if (self.boxes[i].status == 1) {
+            turtlePenColor(self.boxes[i].red, self.boxes[i].green, self.boxes[i].blue);
+            char rgbStr[48];
+            char hexStr[12];
+            sprintf(rgbStr, "%d, %d, %d", (int) round(self.boxes[i].red), (int) round(self.boxes[i].green), (int) round(self.boxes[i].blue));
+            sprintf(hexStr, "#%02X%02X%02X", (int) round(self.boxes[i].red), (int) round(self.boxes[i].green), (int) round(self.boxes[i].blue));
+            double boxWidth = turtleTextGetStringLength(rgbStr, self.boxes[i].size / 10);
+            turtleRectangle(turtle.mouseX - boxWidth / 2 - 2, turtle.mouseY - 12, turtle.mouseX + boxWidth / 2 + 2, turtle.mouseY + 12);
+            sprintf(hexStr, "#%02X%02X%02X", (int) round(self.boxes[i].red), (int) round(self.boxes[i].green), (int) round(self.boxes[i].blue));
+            if (self.boxes[i].red + self.boxes[i].green + self.boxes[i].blue < 150) {
+                turtlePenColor(255, 255, 255);
+            } else {
+                turtlePenColor(0, 0, 0);
+            }
+            turtleTextWriteString(rgbStr, turtle.mouseX, turtle.mouseY + 5, self.boxes[i].size / 10, 50);
+            turtleTextWriteString(hexStr, turtle.mouseX, turtle.mouseY - 5, self.boxes[i].size / 10, 50);
+        }
+    }
     for (uint32_t i = 0; i < NUMBER_OF_BOXES; i++) {
         if (self.boxes[i].red + self.boxes[i].green + self.boxes[i].blue < 150) {
             turtlePenColor(255, 255, 255);
@@ -143,7 +212,10 @@ void mouseTick() {
         }
         if (turtle.mouseX > self.boxes[i].x - self.boxes[i].size * 0.5 && turtle.mouseX < self.boxes[i].x + self.boxes[i].size * 0.5 &&
             turtle.mouseY > self.boxes[i].y - self.boxes[i].size * 0.5 && turtle.mouseY < self.boxes[i].y + self.boxes[i].size * 0.5) {
-            turtleTextWriteString(self.asciiEnum[i], turtle.mouseX, turtle.mouseY + 4, 8, 0);
+            turtlePenColor(255, 255, 255);
+            turtleRectangle(turtle.mouseX, turtle.mouseY - 1, turtle.mouseX + turtleTextGetStringLength(self.asciiEnum[i], 5) + 4, turtle.mouseY + 10);
+            turtlePenColor(0, 0, 0);
+            turtleTextWriteString(self.asciiEnum[i], turtle.mouseX + 2, turtle.mouseY + 4, 5, 0);
         }
     }
     if (turtleKeyPressed(GLFW_KEY_LEFT_SHIFT)) {
@@ -274,6 +346,10 @@ void import(const char *filename) {
         fgets(line, 128, fp);
         sscanf(line, "%lf, %lf, %lf", &self.boxes[i + 1].red, &self.boxes[i + 1].green, &self.boxes[i + 1].blue);
     }
+    /* special - make background color the same as TT_COLOR_DIAL_INNER */
+    self.boxes[0].red = self.boxes[16].red;
+    self.boxes[0].green = self.boxes[16].green;
+    self.boxes[0].blue = self.boxes[16].blue;
     fclose(fp);
 }
 
@@ -414,8 +490,9 @@ int main(int argc, char *argv[]) {
         sprintf(coordsStr, "%.2lf, %.2lf", turtle.mouseX, turtle.mouseY);
         tt_setColor(TT_COLOR_TEXT);
         turtleTextWriteString(coordsStr, -310, -170, 5, 0);
-        turtleToolsUpdate(); // update turtleTools
+        turtleToolsUpdateUI(); // update turtleTools UI elements
         mouseTick();
+        turtleToolsUpdateRibbonPopup(); // update turtleTools ribbon and popup
         parseRibbonOutput(); // user defined function to use ribbon
         parsePopupOutput(window); // user defined function to use popup
         turtleUpdate(); // update the screen
