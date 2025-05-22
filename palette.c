@@ -337,7 +337,7 @@ void renderFakePopup() {
     double textSize = 5;
     double textX = fakePopup.minX + (fakePopup.maxX - fakePopup.minX) / 2;
     double textY = fakePopup.maxY - textSize * 2;
-    tt_setColor(TT_COLOR_TEXT);
+    tt_setColor(TT_COLOR_TEXT_ALTERNATE);
     turtleTextWriteUnicode((unsigned char *) fakePopup.message, textX, textY, textSize, 50);
     textY -= textSize * 4;
     double fullLength = 0;
@@ -376,7 +376,7 @@ void renderFakePopup() {
             tt_setColor(TT_COLOR_POPUP_BUTTON);
             turtleRectangle(textX - textSize, textY - textSize, textX + textSize + strLen, textY + textSize);
         }
-        tt_setColor(TT_COLOR_TEXT);
+        tt_setColor(TT_COLOR_TEXT_ALTERNATE);
         turtleTextWriteUnicode((unsigned char *) fakePopup.options -> data[i].s, textX, textY, textSize, 0);
         textX += strLen + padThai;
     }
@@ -417,7 +417,7 @@ void mouseTick() {
             }
             if (self.dragBox != -1) {
                 self.dragBox = -1;
-                addToUndo();
+                // addToUndo();
             }
         }
         if (self.boxes[i].status == 1) {
@@ -531,6 +531,57 @@ void mouseTick() {
         }
     } else {
         self.keys[6] = 0;
+    }
+    if (turtleKeyPressed(GLFW_KEY_V)) {
+        if (self.keys[7] == 0) {
+            self.keys[7] = 1;
+            if (self.keys[3]) {
+                for (uint32_t i = 0; i < NUMBER_OF_BOXES; i++) {
+                    if (turtle.mouseX > self.boxes[i].x - self.boxes[i].size * 0.5 && turtle.mouseX < self.boxes[i].x + self.boxes[i].size * 0.5 &&
+                        turtle.mouseY > self.boxes[i].y - self.boxes[i].size * 0.5 && turtle.mouseY < self.boxes[i].y + self.boxes[i].size * 0.5) {
+                        osToolsClipboardGetText();
+                        if (osToolsClipboard.text[0] == '#') {
+                            /* assume #FFFFFF */
+                            char sect[3] = {0};
+                            int32_t hexOut;
+                            sect[0] = osToolsClipboard.text[1];
+                            sect[1] = osToolsClipboard.text[2];
+                            sscanf(sect, "%X", &hexOut);
+                            self.boxes[i].red = hexOut;
+                            sect[0] = osToolsClipboard.text[3];
+                            sect[1] = osToolsClipboard.text[4];
+                            sscanf(sect, "%X", &hexOut);
+                            self.boxes[i].green = hexOut;
+                            sect[0] = osToolsClipboard.text[5];
+                            sect[1] = osToolsClipboard.text[6];
+                            sscanf(sect, "%X", &hexOut);
+                            self.boxes[i].blue = hexOut;
+                        } else if (strlen(osToolsClipboard.text) == 6) {
+                            /* assume FFFFFF */
+                            char sect[3] = {0};
+                            int32_t hexOut;
+                            sect[0] = osToolsClipboard.text[0];
+                            sect[1] = osToolsClipboard.text[1];
+                            sscanf(sect, "%X", &hexOut);
+                            self.boxes[i].red = hexOut;
+                            sect[0] = osToolsClipboard.text[2];
+                            sect[1] = osToolsClipboard.text[3];
+                            sscanf(sect, "%X", &hexOut);
+                            self.boxes[i].green = hexOut;
+                            sect[0] = osToolsClipboard.text[4];
+                            sect[1] = osToolsClipboard.text[5];
+                            sscanf(sect, "%X", &hexOut);
+                            self.boxes[i].blue = hexOut;
+                        } else {
+                            /* assume R, G, B */
+                            sscanf(osToolsClipboard.text, "%lf, %lf, %lf", &self.boxes[i].red, &self.boxes[i].green, &self.boxes[i].blue);
+                        }
+                    }
+                }
+            }
+        }
+    } else {
+        self.keys[7] = 0;
     }
     if (self.lockOffsets) {
         for (uint32_t i = 0; i < NUMBER_OF_BOXES; i++) {
@@ -701,6 +752,15 @@ void parseRibbonOutput() {
                     import(osToolsFileDialog.selectedFilename);
                     list_clear(self.undoList);
                     self.undoIndex = 0;
+                    self.saved = -1;
+                    for (uint32_t i = 0; i < NUMBER_OF_BOXES; i++) {
+                        self.newColorPalette[i * 6 + 0] = self.boxes[i].red;
+                        self.newColorPalette[i * 6 + 1] = self.boxes[i].redSave;
+                        self.newColorPalette[i * 6 + 2] = self.boxes[i].green;
+                        self.newColorPalette[i * 6 + 3] = self.boxes[i].greenSave;
+                        self.newColorPalette[i * 6 + 4] = self.boxes[i].blue;
+                        self.newColorPalette[i * 6 + 5] = self.boxes[i].blueSave;
+                    }
                 }
             }
         }

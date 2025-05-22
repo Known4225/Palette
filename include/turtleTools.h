@@ -276,7 +276,7 @@ void ribbonUpdate() {
         }
         cutoff += ribbonRender.lengths -> data[i * 2].d + ribbonRender.marginSize;
         if (turtle.mouseY > ribbonRender.bounds[3] - 10 && turtle.mouseY < ribbonRender.bounds[3] && turtle.mouseX > ribbonRender.bounds[0] + ribbonRender.marginSize / 2.0 && turtle.mouseX < cutoff - ribbonRender.marginSize / 2.0 && ribbonRender.mainselect[0] == -1) { // -217, -195, -164
-            tt_setColor(TT_COLOR_DROPDOWN);
+            tt_setColor(TT_COLOR_RIBBON_SELECT);
             turtleQuad(prevCutoff - ribbonRender.marginSize / 2.0, 179, cutoff - ribbonRender.marginSize / 2.0, 179, cutoff - ribbonRender.marginSize / 2.0, 171, prevCutoff - ribbonRender.marginSize / 2.0, 171); // render dropdown
             ribbonRender.mainselect[0] = i;
         }
@@ -389,7 +389,7 @@ void popupUpdate() {
         double textSize = 5;
         double textX = popup.minX + (popup.maxX - popup.minX) / 2;
         double textY = popup.maxY - textSize * 2;
-        tt_setColor(TT_COLOR_TEXT);
+        tt_setColor(TT_COLOR_TEXT_ALTERNATE);
         turtleTextWriteUnicode((unsigned char *) popup.message, textX, textY, textSize, 50);
         textY -= textSize * 4;
         double fullLength = 0;
@@ -428,7 +428,7 @@ void popupUpdate() {
                 tt_setColor(TT_COLOR_POPUP_BUTTON);
                 turtleRectangle(textX - textSize, textY - textSize, textX + textSize + strLen, textY + textSize);
             }
-            tt_setColor(TT_COLOR_TEXT);
+            tt_setColor(TT_COLOR_TEXT_ALTERNATE);
             turtleTextWriteUnicode((unsigned char *) popup.options -> data[i].s, textX, textY, textSize, 0);
             textX += strLen + padThai;
         }
@@ -721,7 +721,7 @@ void buttonUpdate() {
             tt_setColor(TT_COLOR_BUTTON_SELECT);
         }
         turtleRectangle(buttonX - buttonWidth / 2, buttonY - buttonHeight / 2, buttonX + buttonWidth / 2, buttonY + buttonHeight / 2);
-        tt_setColor(TT_COLOR_TEXT);
+        tt_setColor(TT_COLOR_TEXT_ALTERNATE);
         turtleTextWriteUnicode((unsigned char *) buttonp -> label, buttonX, buttonY, buttonp -> size - 1, 50);
         if (turtleMouseDown()) {
             if (buttonp -> status < 0) {
