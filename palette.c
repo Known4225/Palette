@@ -167,11 +167,10 @@ void init() {
 }
 
 void addToUndo() {
-    // printf("add to undo %d\n", self.saved);
     while (self.undoList -> length > self.undoIndex) {
         list_pop(self.undoList);
     }
-    if (self.firstUndo == 1) {
+    // if (self.firstUndo == 1) {
         for (uint32_t i = 0; i < NUMBER_OF_BOXES; i++) {
             list_append(self.undoList, (unitype) self.newColorPalette[i * 6 + 0], 'd');
             list_append(self.undoList, (unitype) self.newColorPalette[i * 6 + 1], 'd');
@@ -180,15 +179,16 @@ void addToUndo() {
             list_append(self.undoList, (unitype) self.newColorPalette[i * 6 + 4], 'd');
             list_append(self.undoList, (unitype) self.newColorPalette[i * 6 + 5], 'd');
         }
-    }
+    // }
     self.firstUndo = 1;
     self.firstRedo = 1;
     self.undoIndex = self.undoList -> length;
+    printf("add to undo %d\n", self.undoIndex);
     self.saved = 0;
 }
 
 void undo() {
-    // printf("undo %d\n", self.undoIndex);
+    printf("undo %d\n", self.undoIndex);
     if (self.firstUndo == 1) {
         for (uint32_t i = 0; i < NUMBER_OF_BOXES; i++) {
             list_append(self.undoList, (unitype) self.boxes[i].red, 'd');
@@ -224,7 +224,7 @@ void undo() {
 }
 
 void redo() {
-    // printf("redo %d\n", self.undoIndex);
+    printf("redo %d\n", self.undoIndex);
     if (self.undoIndex < self.undoList -> length) {
         if (self.firstRedo == 1) {
             self.undoIndex += 6 * NUMBER_OF_BOXES;
@@ -307,11 +307,7 @@ void renderBoxes() {
         char copyText[64] = "copied ";
         osToolsClipboardGetText();
         memcpy(copyText + 7, osToolsClipboard.text, strlen(osToolsClipboard.text));
-        if (self.boxes[0].red + self.boxes[0].green + self.boxes[0].blue < 150) {
-            turtlePenColorAlpha(255, 255, 255, 255 - self.copyMessage);
-        } else {
-            turtlePenColorAlpha(0, 0, 0, 255 - self.copyMessage);
-        }
+        turtlePenColorAlpha(self.boxes[1].red, self.boxes[1].green, self.boxes[1].blue, 255 - self.copyMessage);
         turtleTextWriteString(copyText, self.topX + self.boxSize * self.width + 5, 160, 8, 0);
     }
 }
@@ -319,11 +315,7 @@ void renderBoxes() {
 void displaySaveIndicator() {
     /* display saved indicator */
     if (self.saved == 0) {
-        if (self.boxes[3].red + self.boxes[3].green + self.boxes[3].blue < 382.5) {
-            turtlePenColor(230, 230, 230);
-        } else {
-            turtlePenColor(10, 10, 10);
-        }
+        turtlePenColor(self.boxes[18].red, self.boxes[18].green, self.boxes[18].blue);
         turtlePenSize(5);
         turtleGoto(310, 175);
         turtlePenDown();
