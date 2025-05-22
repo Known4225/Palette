@@ -699,6 +699,8 @@ void parseRibbonOutput() {
                 if (osToolsFileDialogPrompt(0, "") != -1) {
                     printf("Loaded data from: %s\n", osToolsFileDialog.selectedFilename);
                     import(osToolsFileDialog.selectedFilename);
+                    list_clear(self.undoList);
+                    self.undoIndex = 0;
                 }
             }
         }
