@@ -2,7 +2,7 @@
 #include "include/osTools.h"
 #include <time.h>
 
-#define NUMBER_OF_BOXES 23
+#define NUMBER_OF_BOXES 24
 
 void export(const char *filename);
 void import(const char *filename);
@@ -49,7 +49,7 @@ palette_t self;
 tt_popup_t fakePopup;
 
 /* UI variables */
-int32_t buttonVar, switchVar = 0, dropdownVar = 0;
+int32_t buttonVar, switchVar = 0, dropdownVar = 0, dropdownVar2 = 0;
 double dialVar = 0.0, sliderVar = 0.0;
 
 void init() {
@@ -60,6 +60,12 @@ void init() {
     list_append(dropdownOptions, (unitype) "dropC", 's');
     list_append(dropdownOptions, (unitype) "dropD", 's');
     list_append(dropdownOptions, (unitype) "dropE", 's');
+    list_t *dropdownOptions2 = list_init();
+    list_append(dropdownOptions2, (unitype) "Fotran", 's');
+    list_append(dropdownOptions2, (unitype) "C", 's');
+    list_append(dropdownOptions2, (unitype) "C++", 's');
+    list_append(dropdownOptions2, (unitype) "Ada", 's');
+    list_append(dropdownOptions2, (unitype) "Go", 's');
     double UIX = 200;
     double UIY = 100;
     buttonInit("button", &buttonVar, TT_BUTTON_SHAPE_RECTANGLE, UIX, UIY, 10);
@@ -67,7 +73,8 @@ void init() {
     dialInit("dial", &dialVar, TT_DIAL_EXP, UIX, UIY - 80, 10, 0, 1000, 1);
     sliderInit("slider", &sliderVar, TT_SLIDER_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, UIX, UIY - 120, 10, 50, 0, 10, 1);
     sliderInit("slider", &sliderVar, TT_SLIDER_VERTICAL, TT_SLIDER_ALIGN_CENTER, UIX - 50, UIY - 120, 10, 50, 0, 10, 1);
-    dropdownInit("dropdown", dropdownOptions, &dropdownVar, TT_DROPDOWN_ALIGN_CENTER, UIX, UIY - 165, 10);
+    dropdownInit("dropdown", dropdownOptions, &dropdownVar, TT_DROPDOWN_ALIGN_CENTER, UIX, UIY - 200, 10);
+    dropdownInit("dropdown", dropdownOptions2, &dropdownVar2, TT_DROPDOWN_ALIGN_CENTER, UIX, UIY - 165, 10);
     double boxSliderCopy[] = {
         0.0, 0.0, 0.0,       // override slider text
         0.0, 0.0, 0.0,       // override slider bar
@@ -105,6 +112,7 @@ void init() {
         "TT_COLOR_RIBBON_TOP",
         "TT_COLOR_RIBBON_DROPDOWN",
         "TT_COLOR_RIBBON_SELECT",
+        "TT_COLOR_RIBBON_HOVER",
         "TT_COLOR_POPUP_BOX",
         "TT_COLOR_POPUP_BUTTON",
         "TT_COLOR_POPUP_BUTTON_SELECT",
@@ -654,23 +662,24 @@ void export(const char *filename) {
         "// ribbon top bar color (6)",
         "// ribbon dropdown color (9)",
         "// ribbon select color (12)",
-        "// popup box color (15)",
-        "// popup boxes color (18)",
-        "// popup boxes select color (21)",
-        "// button color (24)",
-        "// button select color (27)",
-        "// switch color off (30)",
-        "// switch circle color off (33)",
-        "// switch color on (36)",
-        "// switch circle color on (39)",
-        "// dial color (42)",
-        "// dial inner circle color (45)",
-        "// slider bar color (48)",
-        "// slider circle color (51)",
-        "// dropdown color (54)",
-        "// dropdown select color (57)",
-        "// dropdown hover color (60)",
-        "// dropdown triangle color (63)",
+        "// ribbon hover color (15)",
+        "// popup box color (18)",
+        "// popup boxes color (21)",
+        "// popup boxes select color (24)",
+        "// button color (27)",
+        "// button select color (30)",
+        "// switch color off (33)",
+        "// switch circle color off (36)",
+        "// switch color on (39)",
+        "// switch circle color on (42)",
+        "// dial color (45)",
+        "// dial inner circle color (48)",
+        "// slider bar color (51)",
+        "// slider circle color (54)",
+        "// dropdown color (57)",
+        "// dropdown select color (60)",
+        "// dropdown hover color (63)",
+        "// dropdown triangle color (66)",
     };
     for (uint32_t i = 0; i < NUMBER_OF_BOXES - 1; i++) {
         char line[128];
@@ -694,9 +703,9 @@ void import(const char *filename) {
         sscanf(line, "%lf, %lf, %lf", &self.boxes[i + 1].red, &self.boxes[i + 1].green, &self.boxes[i + 1].blue);
     }
     /* special - make background color the same as TT_COLOR_DIAL_INNER */
-    self.boxes[0].red = self.boxes[16].red;
-    self.boxes[0].green = self.boxes[16].green;
-    self.boxes[0].blue = self.boxes[16].blue;
+    self.boxes[0].red = self.boxes[TT_COLOR_DIAL_INNER / 3 + 1].red;
+    self.boxes[0].green = self.boxes[TT_COLOR_DIAL_INNER / 3 + 1].green;
+    self.boxes[0].blue = self.boxes[TT_COLOR_DIAL_INNER / 3 + 1].blue;
     fclose(fp);
 }
 
