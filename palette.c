@@ -2,10 +2,7 @@
 #include "include/osTools.h"
 #include <time.h>
 
-#define NUMBER_OF_BOXES 24
-
-void export(const char *filename);
-void import(const char *filename);
+#define NUMBER_OF_BOXES 28
 
 /* box */
 typedef struct {
@@ -50,7 +47,7 @@ tt_popup_t fakePopup;
 
 /* UI variables */
 int32_t buttonVar, switchVar = 0, dropdownVar = 0, dropdownVar2 = 0;
-double dialVar = 0.0, sliderVar = 0.0;
+double dialVar = 0.0, sliderVar = 0.0, scrollbarVar = 0.0;
 
 void init() {
     /* setup UI */
@@ -73,6 +70,7 @@ void init() {
     dialInit("dial", &dialVar, TT_DIAL_EXP, UIX, UIY - 80, 10, 0, 1000, 1);
     sliderInit("slider", &sliderVar, TT_SLIDER_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, UIX, UIY - 120, 10, 50, 0, 10, 1);
     sliderInit("slider", &sliderVar, TT_SLIDER_VERTICAL, TT_SLIDER_ALIGN_CENTER, UIX - 50, UIY - 120, 10, 50, 0, 10, 1);
+    scrollbarInit(&scrollbarVar, TT_SCROLLBAR_VERTICAL, 310, 0, 10, 320, 90);
     dropdownInit("dropdown", dropdownOptions, &dropdownVar, TT_DROPDOWN_ALIGN_CENTER, UIX, UIY - 200, 10);
     dropdownInit("dropdown", dropdownOptions2, &dropdownVar2, TT_DROPDOWN_ALIGN_CENTER, UIX, UIY - 165, 10);
     double boxSliderCopy[] = {
@@ -126,6 +124,10 @@ void init() {
         "TT_COLOR_DIAL_INNER",
         "TT_COLOR_SLIDER_BAR",
         "TT_COLOR_SLIDER_CIRCLE",
+        "TT_COLOR_SCROLLBAR_BASE",
+        "TT_COLOR_SCROLLBAR_BAR",
+        "TT_COLOR_SCROLLBAR_HOVER",
+        "TT_COLOR_SCROLLBAR_CLICKED",
         "TT_COLOR_DROPDOWN",
         "TT_COLOR_DROPDOWN_SELECT",
         "TT_COLOR_DROPDOWN_HOVER",
@@ -137,8 +139,8 @@ void init() {
 
     /* boxes */
     self.lockOffsets = 0;
-    self.width = 5;
-    self.boxSize = 60;
+    self.width = 6;
+    self.boxSize = 50;
     self.topX = -310 + self.boxSize * 0.5;
     self.topY = 160 - self.boxSize * 0.5;
     for (uint32_t i = 0; i < NUMBER_OF_BOXES; i++) {
@@ -311,12 +313,16 @@ void renderBoxes() {
     memcpy(tt_themeColors, setColorPalette + 3, sizeof(tt_themeColors));
     /* display copy message */
     if (self.copyMessage > 0) {
+        if (self.copyMessage == 255) {
+            osToolsClipboardGetText();
+        }
         self.copyMessage--;
         char copyText[64] = "copied ";
-        osToolsClipboardGetText();
-        memcpy(copyText + 7, osToolsClipboard.text, strlen(osToolsClipboard.text));
-        turtlePenColorAlpha(self.boxes[1].red, self.boxes[1].green, self.boxes[1].blue, 255 - self.copyMessage);
-        turtleTextWriteString(copyText, self.topX + self.boxSize * self.width + 5, 160, 8, 0);
+        if (osToolsClipboard.text != NULL) {
+            memcpy(copyText + 7, osToolsClipboard.text, strlen(osToolsClipboard.text));
+            turtlePenColorAlpha(self.boxes[1].red, self.boxes[1].green, self.boxes[1].blue, 255 - self.copyMessage);
+            turtleTextWriteString(copyText, self.topX + self.boxSize * self.width + 5, 160, 8, 0);
+        }
     }
 }
 
@@ -387,6 +393,66 @@ void renderFakePopup() {
     }
 }
 
+void export(const char *filename) {
+    self.saved = 1;
+    FILE *fp = fopen(filename, "w");
+    char messages[][64] = {
+        "// text color (0)",
+        "// text color alternate (3)",
+        "// ribbon top bar color (6)",
+        "// ribbon dropdown color (9)",
+        "// ribbon select color (12)",
+        "// ribbon hover color (15)",
+        "// popup box color (18)",
+        "// popup boxes color (21)",
+        "// popup boxes select color (24)",
+        "// button color (27)",
+        "// button select color (30)",
+        "// switch color off (33)",
+        "// switch circle color off (36)",
+        "// switch color on (39)",
+        "// switch circle color on (42)",
+        "// dial color (45)",
+        "// dial inner circle color (48)",
+        "// slider bar color (51)",
+        "// slider circle color (54)",
+        "// scrollbar bar base color (57)",
+        "// scrollbar bar color (60)",
+        "// scrollbar bar hover color (63)",
+        "// scrollbar bar clicked color (66)",
+        "// dropdown color (69)",
+        "// dropdown select color (72)",
+        "// dropdown hover color (75)",
+        "// dropdown triangle color (78)",
+    };
+    for (uint32_t i = 0; i < NUMBER_OF_BOXES - 1; i++) {
+        char line[128];
+        sprintf(line, "%0.1lf, %0.1lf, %0.1lf,", self.boxes[i + 1].red, self.boxes[i + 1].green, self.boxes[i + 1].blue);
+        while (strlen(line) < 21) {
+            strcat(line, " ");
+        }
+        strcat(line, messages[i]);
+        strcat(line, "\n");
+        fwrite(line, strlen(line), 1, fp);
+    }
+    fclose(fp);
+}
+
+void import(const char *filename) {
+    self.saved = -1;
+    FILE *fp = fopen(filename, "r");
+    for (uint32_t i = 0; i < NUMBER_OF_BOXES - 1; i++) {
+        char line[128];
+        fgets(line, 128, fp);
+        sscanf(line, "%lf, %lf, %lf", &self.boxes[i + 1].red, &self.boxes[i + 1].green, &self.boxes[i + 1].blue);
+    }
+    /* special - make background color the same as TT_COLOR_DIAL_INNER */
+    self.boxes[0].red = self.boxes[TT_COLOR_DIAL_INNER / 3 + 1].red;
+    self.boxes[0].green = self.boxes[TT_COLOR_DIAL_INNER / 3 + 1].green;
+    self.boxes[0].blue = self.boxes[TT_COLOR_DIAL_INNER / 3 + 1].blue;
+    fclose(fp);
+}
+
 void mouseTick() {
     /* mouse */
     for (uint32_t i = 0; i < NUMBER_OF_BOXES; i++) {
@@ -402,7 +468,7 @@ void mouseTick() {
         } else if (turtleMouseRight()) {
             if (self.boxes[i].status < 0) {
                 self.boxes[i].status *= -1;
-                char hexStr[12];
+                char hexStr[16];
                 sprintf(hexStr, "#%02X%02X%02X", (int) round(self.boxes[i].red), (int) round(self.boxes[i].green), (int) round(self.boxes[i].blue));
                 osToolsClipboardSetText(hexStr);
                 self.dragBox = i;
@@ -540,41 +606,43 @@ void mouseTick() {
                     if (turtle.mouseX > self.boxes[i].x - self.boxes[i].size * 0.5 && turtle.mouseX < self.boxes[i].x + self.boxes[i].size * 0.5 &&
                         turtle.mouseY > self.boxes[i].y - self.boxes[i].size * 0.5 && turtle.mouseY < self.boxes[i].y + self.boxes[i].size * 0.5) {
                         osToolsClipboardGetText();
-                        if (osToolsClipboard.text[0] == '#') {
-                            /* assume #FFFFFF */
-                            char sect[3] = {0};
-                            int32_t hexOut;
-                            sect[0] = osToolsClipboard.text[1];
-                            sect[1] = osToolsClipboard.text[2];
-                            sscanf(sect, "%X", &hexOut);
-                            self.boxes[i].red = hexOut;
-                            sect[0] = osToolsClipboard.text[3];
-                            sect[1] = osToolsClipboard.text[4];
-                            sscanf(sect, "%X", &hexOut);
-                            self.boxes[i].green = hexOut;
-                            sect[0] = osToolsClipboard.text[5];
-                            sect[1] = osToolsClipboard.text[6];
-                            sscanf(sect, "%X", &hexOut);
-                            self.boxes[i].blue = hexOut;
-                        } else if (strlen(osToolsClipboard.text) == 6) {
-                            /* assume FFFFFF */
-                            char sect[3] = {0};
-                            int32_t hexOut;
-                            sect[0] = osToolsClipboard.text[0];
-                            sect[1] = osToolsClipboard.text[1];
-                            sscanf(sect, "%X", &hexOut);
-                            self.boxes[i].red = hexOut;
-                            sect[0] = osToolsClipboard.text[2];
-                            sect[1] = osToolsClipboard.text[3];
-                            sscanf(sect, "%X", &hexOut);
-                            self.boxes[i].green = hexOut;
-                            sect[0] = osToolsClipboard.text[4];
-                            sect[1] = osToolsClipboard.text[5];
-                            sscanf(sect, "%X", &hexOut);
-                            self.boxes[i].blue = hexOut;
-                        } else {
-                            /* assume R, G, B */
-                            sscanf(osToolsClipboard.text, "%lf, %lf, %lf", &self.boxes[i].red, &self.boxes[i].green, &self.boxes[i].blue);
+                        if (osToolsClipboard.text != NULL) {
+                            if (osToolsClipboard.text[0] == '#') {
+                                /* assume #FFFFFF */
+                                char sect[3] = {0};
+                                int32_t hexOut;
+                                sect[0] = osToolsClipboard.text[1];
+                                sect[1] = osToolsClipboard.text[2];
+                                sscanf(sect, "%X", &hexOut);
+                                self.boxes[i].red = hexOut;
+                                sect[0] = osToolsClipboard.text[3];
+                                sect[1] = osToolsClipboard.text[4];
+                                sscanf(sect, "%X", &hexOut);
+                                self.boxes[i].green = hexOut;
+                                sect[0] = osToolsClipboard.text[5];
+                                sect[1] = osToolsClipboard.text[6];
+                                sscanf(sect, "%X", &hexOut);
+                                self.boxes[i].blue = hexOut;
+                            } else if (strlen(osToolsClipboard.text) == 6) {
+                                /* assume FFFFFF */
+                                char sect[3] = {0};
+                                int32_t hexOut;
+                                sect[0] = osToolsClipboard.text[0];
+                                sect[1] = osToolsClipboard.text[1];
+                                sscanf(sect, "%X", &hexOut);
+                                self.boxes[i].red = hexOut;
+                                sect[0] = osToolsClipboard.text[2];
+                                sect[1] = osToolsClipboard.text[3];
+                                sscanf(sect, "%X", &hexOut);
+                                self.boxes[i].green = hexOut;
+                                sect[0] = osToolsClipboard.text[4];
+                                sect[1] = osToolsClipboard.text[5];
+                                sscanf(sect, "%X", &hexOut);
+                                self.boxes[i].blue = hexOut;
+                            } else {
+                                /* assume R, G, B */
+                                sscanf(osToolsClipboard.text, "%lf, %lf, %lf", &self.boxes[i].red, &self.boxes[i].green, &self.boxes[i].blue);
+                            }
                         }
                     }
                 }
@@ -651,62 +719,6 @@ void mouseTick() {
             }
         }
     }
-}
-
-void export(const char *filename) {
-    self.saved = 1;
-    FILE *fp = fopen(filename, "w");
-    char messages[][64] = {
-        "// text color (0)",
-        "// text color alternate (3)",
-        "// ribbon top bar color (6)",
-        "// ribbon dropdown color (9)",
-        "// ribbon select color (12)",
-        "// ribbon hover color (15)",
-        "// popup box color (18)",
-        "// popup boxes color (21)",
-        "// popup boxes select color (24)",
-        "// button color (27)",
-        "// button select color (30)",
-        "// switch color off (33)",
-        "// switch circle color off (36)",
-        "// switch color on (39)",
-        "// switch circle color on (42)",
-        "// dial color (45)",
-        "// dial inner circle color (48)",
-        "// slider bar color (51)",
-        "// slider circle color (54)",
-        "// dropdown color (57)",
-        "// dropdown select color (60)",
-        "// dropdown hover color (63)",
-        "// dropdown triangle color (66)",
-    };
-    for (uint32_t i = 0; i < NUMBER_OF_BOXES - 1; i++) {
-        char line[128];
-        sprintf(line, "%0.1lf, %0.1lf, %0.1lf,", self.boxes[i + 1].red, self.boxes[i + 1].green, self.boxes[i + 1].blue);
-        while (strlen(line) < 21) {
-            strcat(line, " ");
-        }
-        strcat(line, messages[i]);
-        strcat(line, "\n");
-        fwrite(line, strlen(line), 1, fp);
-    }
-    fclose(fp);
-}
-
-void import(const char *filename) {
-    self.saved = -1;
-    FILE *fp = fopen(filename, "r");
-    for (uint32_t i = 0; i < NUMBER_OF_BOXES - 1; i++) {
-        char line[128];
-        fgets(line, 128, fp);
-        sscanf(line, "%lf, %lf, %lf", &self.boxes[i + 1].red, &self.boxes[i + 1].green, &self.boxes[i + 1].blue);
-    }
-    /* special - make background color the same as TT_COLOR_DIAL_INNER */
-    self.boxes[0].red = self.boxes[TT_COLOR_DIAL_INNER / 3 + 1].red;
-    self.boxes[0].green = self.boxes[TT_COLOR_DIAL_INNER / 3 + 1].green;
-    self.boxes[0].blue = self.boxes[TT_COLOR_DIAL_INNER / 3 + 1].blue;
-    fclose(fp);
 }
 
 void parseRibbonOutput() {
@@ -856,7 +868,7 @@ int main(int argc, char *argv[]) {
     turtleInit(window, -320, -180, 320, 180);
     /* initialise turtleText */
     strcpy(constructedPath, osToolsFileDialog.executableFilepath);
-    strcat(constructedPath, "include/fontBez.tgl");
+    strcat(constructedPath, "include/roberto.tgl");
     turtleTextInit(constructedPath);
     /* initialise turtleTools ribbon */
     strcpy(constructedPath, osToolsFileDialog.executableFilepath);
