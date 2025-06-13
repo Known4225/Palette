@@ -193,12 +193,12 @@ void addToUndo() {
     self.firstUndo = 1;
     self.firstRedo = 1;
     self.undoIndex = self.undoList -> length;
-    printf("add to undo %d\n", self.undoIndex);
+    // printf("add to undo %d\n", self.undoIndex);
     self.saved = 0;
 }
 
 void undo() {
-    printf("undo %d\n", self.undoIndex);
+    // printf("undo %d\n", self.undoIndex);
     if (self.firstUndo == 1) {
         for (uint32_t i = 0; i < NUMBER_OF_BOXES; i++) {
             list_append(self.undoList, (unitype) self.boxes[i].red, 'd');
