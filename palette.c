@@ -40,6 +40,9 @@ typedef struct {
     uint32_t copyMessage;
     int32_t dragBox;
     int32_t saved;
+    list_t *yPositions;
+    double scroll; // scroll wheel
+    double scrollFactor; // scroll wheel percentage of scrollbar advanced per scroll
 } palette_t;
 
 palette_t self;
@@ -96,8 +99,8 @@ void init() {
     fakePopup.style = 0;
     fakePopup.message = strdup("Are you sure you want to close?");
     fakePopup.options = list_init();
-    list_append(fakePopup.options, (unitype) strdup("Yes"), 's');
-    list_append(fakePopup.options, (unitype) strdup("No"), 's');
+    list_append(fakePopup.options, (unitype) "Yes", 's');
+    list_append(fakePopup.options, (unitype) "No", 's');
 
     /* setup asciiEnum */
     for (uint32_t i = 0; i < NUMBER_OF_BOXES; i++) {
@@ -174,6 +177,15 @@ void init() {
     self.firstUndo = 1;
     self.firstRedo = 1;
     memset(self.keys, 0, sizeof(self.keys));
+
+    self.scroll = 0.0;
+    self.scrollFactor = 15;
+    self.yPositions = list_init();
+    for (uint32_t i = 0; i < tt_elements.all -> length; i++) {
+        list_append(self.yPositions, (unitype) ((tt_button_t *) tt_elements.all -> data[i].p) -> y, 'd');
+    }
+    list_append(self.yPositions, (unitype) fakePopup.minY, 'd');
+    list_append(self.yPositions, (unitype) fakePopup.maxY, 'd');
 }
 
 void addToUndo() {
@@ -719,6 +731,24 @@ void mouseTick() {
             }
         }
     }
+    /* scroll wheel */
+    for (uint32_t i = 0; i < tt_elements.all -> length; i++) {
+        if (((tt_button_t *) tt_elements.all -> data[i].p) -> element != TT_ELEMENT_SCROLLBAR && ((tt_button_t *) tt_elements.all -> data[i].p) -> color.colorOverride != 1) {
+            ((tt_button_t *) tt_elements.all -> data[i].p) -> y = self.yPositions -> data[i].d + scrollbarVar * 0.2;
+        }
+    }
+    fakePopup.minY = self.yPositions -> data[tt_elements.all -> length].d + scrollbarVar * 0.2;
+    fakePopup.maxY = self.yPositions -> data[tt_elements.all -> length + 1].d + scrollbarVar * 0.2;
+    self.scroll = turtleMouseWheel();
+    if (self.scroll != 0) {
+        scrollbarVar -= self.scroll * self.scrollFactor;
+        if (scrollbarVar < 0) {
+            scrollbarVar = 0;
+        }
+        if (scrollbarVar > 100) {
+            scrollbarVar = 100;
+        }
+    }
 }
 
 void parseRibbonOutput() {
@@ -890,7 +920,6 @@ int main(int argc, char *argv[]) {
         strcpy(osToolsFileDialog.selectedFilename, argv[1]);
         import(osToolsFileDialog.selectedFilename);
     }
-
 
     while (turtle.shouldClose == 0) {
         start = clock();
