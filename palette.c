@@ -441,6 +441,10 @@ void export(const char *filename) {
         "// dropdown select color (72)",
         "// dropdown hover color (75)",
         "// dropdown triangle color (78)",
+        "// textbox color (81)",
+        "// textbox phantom text color (84)",
+        "// textbox line color (87)",
+        "// textbox select color (90)",
     };
     for (uint32_t i = 0; i < NUMBER_OF_BOXES - 1; i++) {
         char line[128];

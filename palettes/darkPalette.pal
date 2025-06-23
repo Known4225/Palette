@@ -25,7 +25,7 @@
 80.0, 80.0, 80.0,    // dropdown select color (72)
 80.0, 80.0, 80.0,    // dropdown hover color (75)
 160.0, 160.0, 160.0, // dropdown triangle color (78)
-60.0, 60.0, 60.0,    ðÚµÙø
-80.0, 80.0, 80.0,    i
-160.0, 160.0, 160.0, °ê?1
-11.0, 87.0, 208.0,    |ïÌ²
+60.0, 60.0, 60.0,    // textbox color (81)
+80.0, 80.0, 80.0,    // textbox phantom text color (84)
+160.0, 160.0, 160.0, // textbox line color (87)
+11.0, 87.0, 208.0,   // textbox select color (90)
