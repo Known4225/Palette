@@ -1,3 +1,6 @@
+#ifndef UNITYPELISTSET
+#define UNITYPELISTSET // include guard
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -73,7 +76,7 @@ typedef union { // supported types
     list_t* r;
     uint64_t l;
     uint16_t h;
-    bool b;
+    uint8_t b;
 } unitype;
 
 struct list_f {
@@ -308,10 +311,8 @@ int32_t unitype_check_equal(unitype item1, unitype item2, char typeItem1, char t
 
 /* returns the index of the first instance of the item in the list, returns -1 if not found (python) */
 int32_t list_find(list_t *list, unitype item, char type) {
-    int32_t trig = 0;
     for (uint32_t i = 0; i < list -> length; i++) {
-        trig += unitype_check_equal(list -> data[i], item, list -> type[i], type);
-        if (trig == 1) {
+        if (unitype_check_equal(list -> data[i], item, list -> type[i], type)) {
             return i;
         }
     }
@@ -320,10 +321,8 @@ int32_t list_find(list_t *list, unitype item, char type) {
 
 /* duplicate of list_find */
 int32_t list_index(list_t *list, unitype item, char type) {
-    int32_t trig = 0;
     for (uint32_t i = 0; i < list -> length; i++) {
-        trig += unitype_check_equal(list -> data[i], item, list -> type[i], type);
-        if (trig == 1) {
+        if (unitype_check_equal(list -> data[i], item, list -> type[i], type)) {
             return i;
         }
     }
@@ -376,10 +375,8 @@ void list_sort(list_t *list) {
 
 /* deletes the first instance of the item from the list, returns the index the item was at, returns -1 and doesn't modify the list if not found (python but without ValueError) */
 int32_t list_remove(list_t *list, unitype item, char type) {
-    uint32_t trig = 0;
     for (uint32_t i = 0; i < list -> length; i++) {
-        trig += unitype_check_equal(list -> data[i], item, list -> type[i], type);
-        if (trig == 1) {
+        if (unitype_check_equal(list -> data[i], item, list -> type[i], type)) {
             list_delete(list, i);
             return i;
         }
@@ -394,7 +391,7 @@ void unitype_print(unitype item, char type) {
             printf("%d", item.i);
         break;
         case 'u':
-            printf("%i", item.i);
+            printf("%u", item.u);
         break;
         case 'f':
             printf("%f", item.f);
@@ -526,3 +523,5 @@ void list_free(list_t *list) {
     list_free_lite(list);
     free(list);
 }
+
+#endif

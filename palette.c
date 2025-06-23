@@ -2,7 +2,7 @@
 #include "include/osTools.h"
 #include <time.h>
 
-#define NUMBER_OF_BOXES 28
+#define NUMBER_OF_BOXES 32
 
 /* box */
 typedef struct {
@@ -68,14 +68,15 @@ void init() {
     list_append(dropdownOptions2, (unitype) "Go", 's');
     double UIX = 200;
     double UIY = 100;
-    buttonInit("button", &buttonVar, TT_BUTTON_SHAPE_RECTANGLE, UIX, UIY, 10);
-    switchInit("switch", &switchVar, UIX, UIY - 40, 10);
+    buttonInit("button", (int8_t *) &buttonVar, UIX, UIY, 10);
+    switchInit("switch", (int8_t *) &switchVar, UIX, UIY - 40, 10);
     dialInit("dial", &dialVar, TT_DIAL_EXP, UIX, UIY - 80, 10, 0, 1000, 1);
     sliderInit("slider", &sliderVar, TT_SLIDER_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, UIX, UIY - 120, 10, 50, 0, 10, 1);
     sliderInit("slider", &sliderVar, TT_SLIDER_VERTICAL, TT_SLIDER_ALIGN_CENTER, UIX - 50, UIY - 120, 10, 50, 0, 10, 1);
     scrollbarInit(&scrollbarVar, TT_SCROLLBAR_VERTICAL, 310, 0, 10, 320, 90);
     dropdownInit("dropdown", dropdownOptions, &dropdownVar, TT_DROPDOWN_ALIGN_CENTER, UIX, UIY - 200, 10);
     dropdownInit("dropdown", dropdownOptions2, &dropdownVar2, TT_DROPDOWN_ALIGN_CENTER, UIX, UIY - 165, 10);
+    textboxInit("textbox", 128, 50, -100, 10, 100);
     double boxSliderCopy[] = {
         0.0, 0.0, 0.0,       // override slider text
         0.0, 0.0, 0.0,       // override slider bar
@@ -135,6 +136,10 @@ void init() {
         "TT_COLOR_DROPDOWN_SELECT",
         "TT_COLOR_DROPDOWN_HOVER",
         "TT_COLOR_DROPDOWN_TRIANGLE",
+        "TT_COLOR_TEXTBOX_BOX",
+        "TT_COLOR_TEXTBOX_PHANTOM_TEXT",
+        "TT_COLOR_TEXTBOX_LINE",
+        "TT_COLOR_TEXTBOX_SELECT",
     };
     for (uint32_t i = 0; i < sizeof(asciiCopy) / 32; i++) {
         strcpy(self.asciiEnum[i], asciiCopy[i]);
@@ -832,10 +837,8 @@ void parseRibbonOutput() {
                 printf("Change theme\n");
                 if (tt_theme == TT_THEME_DARK) {
                     turtleBgColor(180, 180, 180);
-                    turtleToolsLightTheme();
                 } else {
                     turtleBgColor(30, 30, 30);
-                    turtleToolsDarkTheme();
                 }
             } 
             if (ribbonRender.output[2] == 2) { // GLFW

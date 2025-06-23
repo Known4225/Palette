@@ -25,6 +25,8 @@ void turtleTexture(int textureCode, double x1, double y1, double x2, double y2, 
 typedef struct {
     GLFWwindow* window; // the window
     list_t *keyPressed; // global keyPressed and mousePressed list
+    void (*keyCallback)(int32_t key, int32_t scancode, int32_t action);
+    void (*unicodeCallback)(uint32_t codepoint);
     int8_t mousePressed[4]; // cached mouse variables
     int32_t screenbounds[2]; // list of screen bounds (pixels)
     int32_t lastscreenbounds[2]; // list of screen bounds last frame
@@ -68,8 +70,18 @@ void turtleSetWorldCoordinates(int32_t minX, int32_t minY, int32_t maxX, int32_t
     turtle.bounds[3] = maxY;
 }
 
+/* detect */
+void unicodeSense(GLFWwindow *window, uint32_t codepoint) {
+    if (turtle.unicodeCallback != NULL) {
+        turtle.unicodeCallback(codepoint);
+    }
+}
+
 /* detect key presses */
 void keySense(GLFWwindow* window, int32_t key, int32_t scancode, int32_t action, int32_t mods) {
+    if (turtle.keyCallback != NULL) {
+        turtle.keyCallback(key, scancode, action);
+    }
     if (action == GLFW_PRESS) {
         list_append(turtle.keyPressed, (unitype) key, 'i');
     }
@@ -187,6 +199,9 @@ void turtleInit(GLFWwindow* window, int32_t minX, int32_t minY, int32_t maxX, in
     }
     turtle.currentColor[3] = 1.0;
     turtleSetWorldCoordinates(minX, minY, maxX, maxY);
+    turtle.keyCallback = NULL;
+    turtle.unicodeCallback = NULL;
+    glfwSetCharCallback(window, unicodeSense);
     glfwSetKeyCallback(window, keySense); // initiate mouse and keyboard detection
     glfwSetMouseButtonCallback(window, mouseSense);
     glfwSetScrollCallback(window, scrollSense);
