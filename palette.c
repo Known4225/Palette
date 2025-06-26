@@ -2,7 +2,7 @@
 #include "include/osTools.h"
 #include <time.h>
 
-#define NUMBER_OF_BOXES 32
+#define NUMBER_OF_BOXES 33
 
 /* box */
 typedef struct {
@@ -29,7 +29,7 @@ typedef struct {
     box_t boxes[NUMBER_OF_BOXES];
     double newColorPalette[NUMBER_OF_BOXES * 6];
     char lockOffsets;
-    char asciiEnum[NUMBER_OF_BOXES][32];
+    char asciiEnum[NUMBER_OF_BOXES][64];
     double boxSliderColors[9];
     double boxSliderColorsAlt[9];
     list_t *undoList;
@@ -107,7 +107,7 @@ void init() {
     for (uint32_t i = 0; i < NUMBER_OF_BOXES; i++) {
         strcpy(self.asciiEnum[i], "NULL");
     }
-    char asciiCopy[][32] = {
+    char asciiCopy[][64] = {
         "BACKGROUND",
         "TT_COLOR_TEXT",
         "TT_COLOR_TEXT_ALTERNATE",
@@ -120,6 +120,7 @@ void init() {
         "TT_COLOR_POPUP_BUTTON_SELECT",
         "TT_COLOR_BUTTON",
         "TT_COLOR_BUTTON_SELECT",
+        "TT_COLOR_SWITCH_TEXT_HOVER",
         "TT_COLOR_SWITCH_OFF",
         "TT_COLOR_SWITCH_CIRCLE_OFF",
         "TT_COLOR_SWITCH_ON",
@@ -425,26 +426,27 @@ void export(const char *filename) {
         "// popup boxes select color (24)",
         "// button color (27)",
         "// button select color (30)",
-        "// switch color off (33)",
-        "// switch circle color off (36)",
-        "// switch color on (39)",
-        "// switch circle color on (42)",
-        "// dial color (45)",
-        "// dial inner circle color (48)",
-        "// slider bar color (51)",
-        "// slider circle color (54)",
-        "// scrollbar bar base color (57)",
-        "// scrollbar bar color (60)",
-        "// scrollbar bar hover color (63)",
-        "// scrollbar bar clicked color (66)",
-        "// dropdown color (69)",
-        "// dropdown select color (72)",
-        "// dropdown hover color (75)",
-        "// dropdown triangle color (78)",
-        "// textbox color (81)",
-        "// textbox phantom text color (84)",
-        "// textbox line color (87)",
-        "// textbox select color (90)",
+        "// switch text hover (33)",
+        "// switch color off (36)",
+        "// switch circle color off (39)",
+        "// switch color on (42)",
+        "// switch circle color on (45)",
+        "// dial color (48)",
+        "// dial inner circle color (51)",
+        "// slider bar color (54)",
+        "// slider circle color (57)",
+        "// scrollbar bar base color (60)",
+        "// scrollbar bar color (63)",
+        "// scrollbar bar hover color (66)",
+        "// scrollbar bar clicked color (69)",
+        "// dropdown color (72)",
+        "// dropdown select color (75)",
+        "// dropdown hover color (78)",
+        "// dropdown triangle color (81)",
+        "// textbox color (84)",
+        "// textbox phantom text color (87)",
+        "// textbox line color (90)",
+        "// textbox select color (93)",
     };
     for (uint32_t i = 0; i < NUMBER_OF_BOXES - 1; i++) {
         char line[128];

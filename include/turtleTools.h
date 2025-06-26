@@ -29,7 +29,7 @@ double randomDouble(double lowerBound, double upperBound) { // random double bet
 char *strins(char *dest, char *source, int32_t index) {
     int32_t lenDest = strlen(dest);
     int32_t lenSource = strlen(source);
-    memmove(dest + index + lenSource, dest + index, lenDest - index);
+    memmove(dest + index + lenSource, dest + index, lenDest - index + 1);
     memcpy(dest + index, source, lenSource);
     return dest;
 }
@@ -37,7 +37,9 @@ char *strins(char *dest, char *source, int32_t index) {
 char *strdel(char *dest, int32_t index, int32_t size) {
     int32_t len = strlen(dest);
     memmove(dest + index, dest + index + size, len - index - size);
-    dest[len - size] = '\0';
+    for (uint32_t i = 0; i < size + 1; i++) {
+        dest[len - size + i] = '\0';
+    }
     return dest;
 }
 
@@ -101,26 +103,27 @@ typedef enum {
     TT_COLOR_POPUP_BUTTON_SELECT = 24,
     TT_COLOR_BUTTON = 27,
     TT_COLOR_BUTTON_SELECT = 30,
-    TT_COLOR_SWITCH_OFF = 33,
-    TT_COLOR_SWITCH_CIRCLE_OFF = 36,
-    TT_COLOR_SWITCH_ON = 39,
-    TT_COLOR_SWITCH_CIRCLE_ON = 42,
-    TT_COLOR_DIAL = 45,
-    TT_COLOR_DIAL_INNER = 48,
-    TT_COLOR_SLIDER_BAR = 51,
-    TT_COLOR_SLIDER_CIRCLE = 54,
-    TT_COLOR_SCROLLBAR_BASE = 57,
-    TT_COLOR_SCROLLBAR_BAR = 60,
-    TT_COLOR_SCROLLBAR_HOVER = 63,
-    TT_COLOR_SCROLLBAR_CLICKED = 66,
-    TT_COLOR_DROPDOWN = 69,
-    TT_COLOR_DROPDOWN_SELECT = 72,
-    TT_COLOR_DROPDOWN_HOVER = 75,
-    TT_COLOR_DROPDOWN_TRIANGLE = 78,
-    TT_COLOR_TEXTBOX_BOX = 81,
-    TT_COLOR_TEXTBOX_PHANTOM_TEXT = 84,
-    TT_COLOR_TEXTBOX_LINE = 87,
-    TT_COLOR_TEXTBOX_SELECT = 90,
+    TT_COLOR_SWITCH_TEXT_HOVER = 33,
+    TT_COLOR_SWITCH_OFF = 36,
+    TT_COLOR_SWITCH_CIRCLE_OFF = 39,
+    TT_COLOR_SWITCH_ON = 42,
+    TT_COLOR_SWITCH_CIRCLE_ON = 45,
+    TT_COLOR_DIAL = 48,
+    TT_COLOR_DIAL_INNER = 51,
+    TT_COLOR_SLIDER_BAR = 54,
+    TT_COLOR_SLIDER_CIRCLE = 57,
+    TT_COLOR_SCROLLBAR_BASE = 60,
+    TT_COLOR_SCROLLBAR_BAR = 63,
+    TT_COLOR_SCROLLBAR_HOVER = 66,
+    TT_COLOR_SCROLLBAR_CLICKED = 69,
+    TT_COLOR_DROPDOWN = 72,
+    TT_COLOR_DROPDOWN_SELECT = 75,
+    TT_COLOR_DROPDOWN_HOVER = 78,
+    TT_COLOR_DROPDOWN_TRIANGLE = 81,
+    TT_COLOR_TEXTBOX_BOX = 84,
+    TT_COLOR_TEXTBOX_PHANTOM_TEXT = 87,
+    TT_COLOR_TEXTBOX_LINE = 90,
+    TT_COLOR_TEXTBOX_SELECT = 93,
 } tt_theme_internal_t;
 
 /* default colours (light theme) */
@@ -136,26 +139,27 @@ double tt_themeColors[] = {
     100.0, 100.0, 100.0, // popup boxes select color (24)
     200.0, 200.0, 200.0, // button color (27)
     160.0, 160.0, 160.0, // button select color (30)
-    180.0, 180.0, 180.0, // switch color off (33)
-    230.0, 230.0, 230.0, // switch circle color off (36)
-    30.0, 30.0, 30.0,    // switch color on (39)
-    0.0, 255.0, 255.0,   // switch circle color on (42)
-    0.0, 0.0, 0.0,       // dial color (45)
-    255.0, 255.0, 255.0, // dial inner circle color (48)
-    120.0, 120.0, 120.0, // slider bar color (51)
-    230.0, 230.0, 230.0, // slider circle color (54)
-    200.0, 200.0, 200.0, // scrollbar bar base color (57)
-    160.0, 160.0, 160.0, // scrollbar bar color (60)
-    120.0, 120.0, 120.0, // scrollbar bar hover color (63)
-    120.0, 120.0, 120.0, // scrollbar bar clicked color (66)
-    160.0, 160.0, 160.0, // dropdown color (69)
-    120.0, 120.0, 120.0, // dropdown select color (72)
-    120.0, 120.0, 120.0, // dropdown hover color (75)
-    100.0, 100.0, 100.0, // dropdown triangle color (78)
-    160.0, 160.0, 160.0, // textbox color (81)
-    200.0, 200.0, 200.0, // textbox phantom text color (84)
-    120.0, 120.0, 120.0, // textbox line color (87)
-    11.0, 87.0, 208.0,   // textbox select color (90)
+    30.0, 30.0, 30.0,    // switch text hover (33)
+    180.0, 180.0, 180.0, // switch color off (36)
+    230.0, 230.0, 230.0, // switch circle color off (39)
+    30.0, 30.0, 30.0,    // switch color on (42)
+    0.0, 255.0, 255.0,   // switch circle color on (45)
+    0.0, 0.0, 0.0,       // dial color (48)
+    255.0, 255.0, 255.0, // dial inner circle color (51)
+    120.0, 120.0, 120.0, // slider bar color (54)
+    230.0, 230.0, 230.0, // slider circle color (57)
+    200.0, 200.0, 200.0, // scrollbar bar base color (60)
+    160.0, 160.0, 160.0, // scrollbar bar color (63)
+    120.0, 120.0, 120.0, // scrollbar bar hover color (66)
+    120.0, 120.0, 120.0, // scrollbar bar clicked color (69)
+    160.0, 160.0, 160.0, // dropdown color (72)
+    120.0, 120.0, 120.0, // dropdown select color (75)
+    120.0, 120.0, 120.0, // dropdown hover color (78)
+    100.0, 100.0, 100.0, // dropdown triangle color (81)
+    200.0, 200.0, 200.0, // textbox color (84)
+    180.0, 180.0, 180.0, // textbox phantom text color (87)
+    0.0, 0.0, 0.0,       // textbox line color (90)
+    11.0, 87.0, 208.0,   // textbox select color (93)
 };
 
 void tt_setColor(int32_t index) {
@@ -177,26 +181,27 @@ void turtleToolsSetTheme(tt_theme_name_t theme) {
             60.0, 60.0, 60.0,    // popup boxes select color (24)
             80.0, 80.0, 80.0,    // button color (27)
             100.0, 100.0, 100.0, // button select color (30)
-            60.0, 60.0, 60.0,    // switch color off (33)
-            80.0, 80.0, 80.0,    // switch circle color off (36)
-            10.0, 10.0, 10.0,    // switch color on (39)
-            50.0, 230.0, 30.0,   // switch circle color on (42)
-            200.0, 200.0, 200.0, // dial color (45)
-            30.0, 30.0, 30.0,    // dial inner circle color (48)
-            10.0, 10.0, 10.0,    // slider bar color (51)
-            230.0, 230.0, 230.0, // slider circle color (54)
-            50.0, 50.0, 50.0,    // scrollbar bar base color (57)
-            150.0, 150.0, 150.0, // scrollbar bar color (60)
-            170.0, 170.0, 170.0, // scrollbar bar hover color (63)
-            190.0, 190.0, 190.0, // scrollbar bar clicked color (66)
-            60.0, 60.0, 60.0,    // dropdown color (69)
-            80.0, 80.0, 80.0,    // dropdown select color (72)
-            80.0, 80.0, 80.0,    // dropdown hover color (75)
-            160.0, 160.0, 160.0, // dropdown triangle color (78)
-            60.0, 60.0, 60.0,    // textbox color (81)
-            80.0, 80.0, 80.0,    // textbox phantom text color (84)
-            160.0, 160.0, 160.0, // textbox line color (87)
-            11.0, 87.0, 208.0,   // textbox select color (90)
+            160.0, 160.0, 160.0, // switch text hover (33)
+            60.0, 60.0, 60.0,    // switch color off (36)
+            80.0, 80.0, 80.0,    // switch circle color off (39)
+            10.0, 10.0, 10.0,    // switch color on (42)
+            50.0, 230.0, 30.0,   // switch circle color on (45)
+            200.0, 200.0, 200.0, // dial color (48)
+            30.0, 30.0, 30.0,    // dial inner circle color (51)
+            10.0, 10.0, 10.0,    // slider bar color (54)
+            230.0, 230.0, 230.0, // slider circle color (57)
+            50.0, 50.0, 50.0,    // scrollbar bar base color (60)
+            150.0, 150.0, 150.0, // scrollbar bar color (63)
+            170.0, 170.0, 170.0, // scrollbar bar hover color (66)
+            190.0, 190.0, 190.0, // scrollbar bar clicked color (69)
+            60.0, 60.0, 60.0,    // dropdown color (72)
+            80.0, 80.0, 80.0,    // dropdown select color (75)
+            80.0, 80.0, 80.0,    // dropdown hover color (78)
+            160.0, 160.0, 160.0, // dropdown triangle color (81)
+            60.0, 60.0, 60.0,    // textbox color (84)
+            80.0, 80.0, 80.0,    // textbox phantom text color (87)
+            160.0, 160.0, 160.0, // textbox line color (90)
+            11.0, 87.0, 208.0,   // textbox select color (93)
         };
         memcpy(tt_themeColors, tt_themeCopy, sizeof(tt_themeCopy));
     } else if (theme == TT_THEME_COLT) {
@@ -213,62 +218,64 @@ void turtleToolsSetTheme(tt_theme_name_t theme) {
             73.0, 60.0, 60.0,    // popup boxes select color (24)
             89.0, 80.0, 80.0,    // button color (27)
             111.0, 109.0, 100.0, // button select color (30)
-            68.0, 60.0, 60.0,    // switch color off (33)
-            91.0, 80.0, 80.0,    // switch circle color off (36)
-            69.0, 55.0, 53.0,    // switch color on (39)
-            242.0, 242.0, 230.0, // switch circle color on (42)
-            211.0, 211.0, 200.0, // dial color (45)
-            36.0, 30.0, 32.0,    // dial inner circle color (48)
-            69.0, 55.0, 53.0,    // slider bar color (51)
-            242.0, 242.0, 230.0, // slider circle color (54)
-            241.0, 239.0, 236.0, // scrollbar bar base color (57)
-            69.0, 55.0, 53.0,    // scrollbar bar color (60)
-            84.0, 70.0, 68.0,    // scrollbar bar hover color (63)
-            84.0, 70.0, 68.0,    // scrollbar bar clicked color (66)
-            68.0, 60.0, 60.0,    // dropdown color (69)
-            92.0, 80.0, 80.0,    // dropdown select color (72)
-            93.0, 80.0, 80.0,    // dropdown hover color (75)
-            175.0, 171.0, 160.0, // dropdown triangle color (78)
-            160.0, 160.0, 160.0, // textbox color (81)
-            200.0, 200.0, 200.0, // textbox phantom text color (84)
-            120.0, 120.0, 120.0, // textbox line color (87)
-            11.0, 87.0, 208.0,   // textbox select color (90)
+            154.0, 160.0, 160.0, // switch text hover (33)
+            68.0, 60.0, 60.0,    // switch color off (36)
+            91.0, 80.0, 80.0,    // switch circle color off (39)
+            69.0, 55.0, 53.0,    // switch color on (42)
+            242.0, 242.0, 230.0, // switch circle color on (45)
+            211.0, 211.0, 200.0, // dial color (48)
+            36.0, 30.0, 32.0,    // dial inner circle color (51)
+            69.0, 55.0, 53.0,    // slider bar color (54)
+            242.0, 242.0, 230.0, // slider circle color (57)
+            241.0, 239.0, 236.0, // scrollbar bar base color (60)
+            69.0, 55.0, 53.0,    // scrollbar bar color (63)
+            84.0, 70.0, 68.0,    // scrollbar bar hover color (66)
+            84.0, 70.0, 68.0,    // scrollbar bar clicked color (69)
+            68.0, 60.0, 60.0,    // dropdown color (72)
+            92.0, 80.0, 80.0,    // dropdown select color (75)
+            93.0, 80.0, 80.0,    // dropdown hover color (78)
+            175.0, 171.0, 160.0, // dropdown triangle color (81)
+            89.0, 80.0, 80.0,    // textbox color (84)
+            143.0, 134.0, 134.0, // textbox phantom text color (87)
+            154.0, 160.0, 160.0, // textbox line color (90)
+            11.0, 87.0, 208.0,   // textbox select color (93)
         };
         memcpy(tt_themeColors, tt_themeCopy, sizeof(tt_themeCopy));
     } else if (theme == TT_THEME_NAVY) {
         tt_theme = theme;
         double tt_themeCopy[] = {
             3.0, 3.0, 3.0,       // text color (0)
-            241.0, 239.0, 236.0, // text color alternate (3)
-            21.2, 115.6, 160.2,  // ribbon top bar color (6)
-            74.0, 108.0, 144.0,  // ribbon dropdown color (9)
-            112.0, 146.0, 182.0, // ribbon select color (12)
-            112.0, 146.0, 182.0, // ribbon hover color (15)
-            18.0, 52.0, 88.0,    // popup box color (18)
-            74.0, 108.0, 144.0,  // popup boxes color (21)
-            126.0, 160.0, 196.0, // popup boxes select color (24)
-            18.0, 52.0, 88.0,    // button color (27)
-            74.0, 108.0, 144.0,  // button select color (30)
-            18.0, 52.0, 88.0,    // switch color off (33)
-            241.0, 239.0, 236.0, // switch circle color off (36)
-            18.0, 52.0, 88.0,    // switch color on (39)
-            241.0, 239.0, 236.0, // switch circle color on (42)
-            3.0, 3.0, 3.0,       // dial color (45)
-            212.0, 201.0, 190.0, // dial inner circle color (48)
-            18.0, 52.0, 88.0,    // slider bar color (51)
-            241.0, 239.0, 236.0, // slider circle color (54)
-            241.0, 239.0, 236.0, // scrollbar bar base color (57)
-            33.6, 161.9, 211.6,  // scrollbar bar color (60)
-            50.0, 178.3, 228.0,  // scrollbar bar hover color (63)
-            50.0, 178.3, 228.0,  // scrollbar bar clicked color (66)
-            18.0, 52.0, 88.0,    // dropdown color (69)
-            74.0, 108.0, 144.0,  // dropdown select color (72)
-            74.0, 108.0, 144.0,  // dropdown hover color (75)
-            241.0, 239.0, 236.0, // dropdown triangle color (78)
-            160.0, 160.0, 160.0, // textbox color (81)
-            200.0, 200.0, 200.0, // textbox phantom text color (84)
-            120.0, 120.0, 120.0, // textbox line color (87)
-            11.0, 87.0, 208.0,   // textbox select color (90)
+        241.0, 239.0, 236.0, // text color alternate (3)
+        21.2, 115.6, 160.2,  // ribbon top bar color (6)
+        74.0, 108.0, 144.0,  // ribbon dropdown color (9)
+        112.0, 146.0, 182.0, // ribbon select color (12)
+        112.0, 146.0, 182.0, // ribbon hover color (15)
+        18.0, 52.0, 88.0,    // popup box color (18)
+        74.0, 108.0, 144.0,  // popup boxes color (21)
+        126.0, 160.0, 196.0, // popup boxes select color (24)
+        18.0, 52.0, 88.0,    // button color (27)
+        74.0, 108.0, 144.0,  // button select color (30)
+        18.0, 52.0, 88.0,    // switch text hover (33)
+        18.0, 52.0, 88.0,    // switch color off (36)
+        241.0, 239.0, 236.0, // switch circle color off (39)
+        18.0, 52.0, 88.0,    // switch color on (42)
+        241.0, 239.0, 236.0, // switch circle color on (45)
+        3.0, 3.0, 3.0,       // dial color (48)
+        212.0, 201.0, 190.0, // dial inner circle color (51)
+        18.0, 52.0, 88.0,    // slider bar color (54)
+        241.0, 239.0, 236.0, // slider circle color (57)
+        241.0, 239.0, 236.0, // scrollbar bar base color (60)
+        33.6, 161.9, 211.6,  // scrollbar bar color (63)
+        50.0, 178.3, 228.0,  // scrollbar bar hover color (66)
+        50.0, 178.3, 228.0,  // scrollbar bar clicked color (69)
+        18.0, 52.0, 88.0,    // dropdown color (72)
+        74.0, 108.0, 144.0,  // dropdown select color (75)
+        74.0, 108.0, 144.0,  // dropdown hover color (78)
+        241.0, 239.0, 236.0, // dropdown triangle color (81)
+        18.0, 52.0, 88.0,    // textbox color (84)
+        112.0, 146.0, 182.0, // textbox phantom text color (87)
+        241.0, 239.0, 236.0, // textbox line color (90)
+        11.0, 87.0, 208.0,   // textbox select color (93)
         };
         memcpy(tt_themeColors, tt_themeCopy, sizeof(tt_themeCopy));
     } else {
@@ -285,26 +292,27 @@ void turtleToolsSetTheme(tt_theme_name_t theme) {
             100.0, 100.0, 100.0, // popup boxes select color (24)
             200.0, 200.0, 200.0, // button color (27)
             160.0, 160.0, 160.0, // button select color (30)
-            180.0, 180.0, 180.0, // switch color off (33)
-            230.0, 230.0, 230.0, // switch circle color off (36)
-            30.0, 30.0, 30.0,    // switch color on (39)
-            0.0, 255.0, 255.0,   // switch circle color on (42)
-            0.0, 0.0, 0.0,       // dial color (45)
-            255.0, 255.0, 255.0, // dial inner circle color (48)
-            120.0, 120.0, 120.0, // slider bar color (51)
-            230.0, 230.0, 230.0, // slider circle color (54)
-            200.0, 200.0, 200.0, // scrollbar bar base color (57)
-            160.0, 160.0, 160.0, // scrollbar bar color (60)
-            120.0, 120.0, 120.0, // scrollbar bar hover color (63)
-            120.0, 120.0, 120.0, // scrollbar bar clicked color (66)
-            160.0, 160.0, 160.0, // dropdown color (69)
-            120.0, 120.0, 120.0, // dropdown select color (72)
-            120.0, 120.0, 120.0, // dropdown hover color (75)
-            100.0, 100.0, 100.0, // dropdown triangle color (78)
-            160.0, 160.0, 160.0, // textbox color (81)
-            200.0, 200.0, 200.0, // textbox phantom text color (84)
-            120.0, 120.0, 120.0, // textbox line color (87)
-            11.0, 87.0, 208.0,   // textbox select color (90)
+            30.0, 30.0, 30.0,    // switch text hover (33)
+            180.0, 180.0, 180.0, // switch color off (36)
+            230.0, 230.0, 230.0, // switch circle color off (39)
+            30.0, 30.0, 30.0,    // switch color on (42)
+            0.0, 255.0, 255.0,   // switch circle color on (45)
+            0.0, 0.0, 0.0,       // dial color (48)
+            255.0, 255.0, 255.0, // dial inner circle color (51)
+            120.0, 120.0, 120.0, // slider bar color (54)
+            230.0, 230.0, 230.0, // slider circle color (57)
+            200.0, 200.0, 200.0, // scrollbar bar base color (60)
+            160.0, 160.0, 160.0, // scrollbar bar color (63)
+            120.0, 120.0, 120.0, // scrollbar bar hover color (66)
+            120.0, 120.0, 120.0, // scrollbar bar clicked color (69)
+            160.0, 160.0, 160.0, // dropdown color (72)
+            120.0, 120.0, 120.0, // dropdown select color (75)
+            120.0, 120.0, 120.0, // dropdown hover color (78)
+            100.0, 100.0, 100.0, // dropdown triangle color (81)
+            200.0, 200.0, 200.0, // textbox color (84)
+            180.0, 180.0, 180.0, // textbox phantom text color (87)
+            0.0, 0.0, 0.0,       // textbox line color (90)
+            11.0, 87.0, 208.0,   // textbox select color (93)
         };
         memcpy(tt_themeColors, tt_themeCopy, sizeof(tt_themeCopy));
     }
@@ -653,8 +661,10 @@ typedef struct {
 
 typedef enum {
     TT_SWITCH_STYLE_CLASSIC = 0,
-    TT_SWITCH_STYLE_CHECKBOX = 1,
-    TT_SWITCH_STYLE_XBOX = 2,
+    TT_SWITCH_STYLE_SIDESWIPE_LEFT = 1,
+    TT_SWITCH_STYLE_SIDESWIPE_RIGHT = 2,
+    TT_SWITCH_STYLE_CHECKBOX = 3,
+    TT_SWITCH_STYLE_XBOX = 4,
 } tt_switch_style_t;
 
 /* switch */
@@ -789,6 +799,10 @@ typedef struct {
     int32_t editIndex;
     int32_t lastKey;
     int32_t keyTimeout;
+    /* render variables */
+    double renderPixelOffset;
+    int32_t renderStartingIndex;
+    int32_t renderNumCharacters;
 } tt_textbox_t;
 
 /* override colors with color array */
@@ -809,15 +823,15 @@ typedef enum {
 } tt_color_override_internal_t;
 
 int32_t tt_color_override_default[] = {
-    /*  button                   switch                      dial                  slider                   scrollbar                   dropdown               textbox  */
-    TT_COLOR_TEXT,          TT_COLOR_TEXT,              TT_COLOR_TEXT,       TT_COLOR_TEXT,          0,                          TT_COLOR_TEXT,              TT_COLOR_TEXT,
-    TT_COLOR_BUTTON,        TT_COLOR_SWITCH_ON,         TT_COLOR_DIAL,       TT_COLOR_SLIDER_BAR,    TT_COLOR_SCROLLBAR_BASE,    TT_COLOR_TEXT_ALTERNATE,    TT_COLOR_TEXT,
-    TT_COLOR_BUTTON_SELECT, TT_COLOR_SWITCH_OFF,        TT_COLOR_DIAL_INNER, TT_COLOR_SLIDER_CIRCLE, TT_COLOR_SCROLLBAR_HOVER,   TT_COLOR_DROPDOWN,          TT_COLOR_TEXT,
-    0,                      TT_COLOR_SWITCH_CIRCLE_ON,  0,                   0,                      TT_COLOR_SCROLLBAR_CLICKED, TT_COLOR_DROPDOWN_SELECT,   TT_COLOR_TEXT,
-    0,                      TT_COLOR_SWITCH_CIRCLE_OFF, 0,                   0,                      TT_COLOR_SCROLLBAR_BAR,     TT_COLOR_DROPDOWN_HOVER,    TT_COLOR_TEXT,
-    0,                      0,                          0,                   0,                      0,                          TT_COLOR_DROPDOWN_TRIANGLE, TT_COLOR_TEXT,
-    0,                      0,                          0,                   0,                      0,                          0,                          TT_COLOR_TEXT,
-    0,                      0,                          0,                   0,                      0,                          0,                          TT_COLOR_TEXT,
+    /*  button                    switch                      dial                  slider                   scrollbar                   dropdown               textbox  */
+    TT_COLOR_TEXT_ALTERNATE, TT_COLOR_TEXT,              TT_COLOR_TEXT,       TT_COLOR_TEXT,          0,                          TT_COLOR_TEXT,              TT_COLOR_TEXT_ALTERNATE,
+    TT_COLOR_BUTTON,         TT_COLOR_SWITCH_TEXT_HOVER, TT_COLOR_DIAL,       TT_COLOR_SLIDER_BAR,    TT_COLOR_SCROLLBAR_BASE,    TT_COLOR_TEXT_ALTERNATE,    TT_COLOR_TEXTBOX_BOX,
+    TT_COLOR_BUTTON_SELECT,  TT_COLOR_SWITCH_ON,         TT_COLOR_DIAL_INNER, TT_COLOR_SLIDER_CIRCLE, TT_COLOR_SCROLLBAR_HOVER,   TT_COLOR_DROPDOWN,          TT_COLOR_TEXTBOX_PHANTOM_TEXT,
+    0,                       TT_COLOR_SWITCH_OFF,        0,                   0,                      TT_COLOR_SCROLLBAR_CLICKED, TT_COLOR_DROPDOWN_SELECT,   TT_COLOR_TEXTBOX_LINE,
+    0,                       TT_COLOR_SWITCH_CIRCLE_ON,  0,                   0,                      TT_COLOR_SCROLLBAR_BAR,     TT_COLOR_DROPDOWN_HOVER,    TT_COLOR_TEXTBOX_SELECT,
+    0,                       TT_COLOR_SWITCH_CIRCLE_OFF, 0,                   0,                      0,                          TT_COLOR_DROPDOWN_TRIANGLE, 0,
+    0,                       0,                          0,                   0,                      0,                          0,                          0,
+    0,                       0,                          0,                   0,                      0,                          0,                          0,
 };
 
 void elementResetColor(void *elementp, int32_t elementType) {
@@ -1107,11 +1121,14 @@ tt_textbox_t *textboxInit(char *label, uint32_t maxCharacters, double x, double 
     textboxp -> y = y;
     textboxp -> size = size;
     textboxp -> length = length;
-    textboxp -> text = calloc(maxCharacters + 1, 1);
+    textboxp -> text = calloc(maxCharacters + 5, 1);
     textboxp -> maxCharacters = maxCharacters;
     textboxp -> editIndex = 0;
     textboxp -> lastKey = 0;
     textboxp -> keyTimeout = 0;
+    textboxp -> renderPixelOffset = 0;
+    textboxp -> renderStartingIndex = 0;
+    textboxp -> renderNumCharacters = 0;
     list_append(tt_elements.textboxes, (unitype) (void *) textboxp, 'p');
     list_append(tt_elements.all, (unitype) (void *) textboxp, 'l');
     return textboxp;
@@ -1181,13 +1198,16 @@ void switchUpdate() {
         }
         double switchX = switchp -> x;
         double switchY = switchp -> y;
-        if (switchp -> style == TT_SWITCH_STYLE_CLASSIC) {
-            tt_internalColor(switchp, TT_COLOR_TEXT, TT_COLOR_OVERRIDE_SLOT_0);
-            turtleTextWriteUnicode((unsigned char *) switchp -> label, switchX, switchY + 1.6 * switchp -> size, switchp -> size - 1, 50);
+        double switchClickLeft = switchX;
+        double switchClickRight = switchX;
+        double switchClickDown = switchY;
+        double switchClickUp = switchY;
+        if (switchp -> style == TT_SWITCH_STYLE_CLASSIC || switchp -> style == TT_SWITCH_STYLE_SIDESWIPE_LEFT || switchp -> style == TT_SWITCH_STYLE_SIDESWIPE_RIGHT) {
+            /* render switch */
             if (*(switchp -> variable)) {
-                tt_internalColor(switchp, TT_COLOR_SWITCH_ON, TT_COLOR_OVERRIDE_SLOT_1);
+                tt_internalColor(switchp, TT_COLOR_SWITCH_ON, TT_COLOR_OVERRIDE_SLOT_2);
             } else {
-                tt_internalColor(switchp, TT_COLOR_SWITCH_OFF, TT_COLOR_OVERRIDE_SLOT_2);
+                tt_internalColor(switchp, TT_COLOR_SWITCH_OFF, TT_COLOR_OVERRIDE_SLOT_3);
             }
             turtlePenSize(switchp -> size * 1.2);
             turtleGoto(switchX - switchp -> size * 0.8, switchY);
@@ -1196,38 +1216,51 @@ void switchUpdate() {
             turtlePenUp();
             turtlePenSize(switchp -> size);
             if (*(switchp -> variable)) {
-                tt_internalColor(switchp, TT_COLOR_SWITCH_CIRCLE_ON, TT_COLOR_OVERRIDE_SLOT_3);
+                tt_internalColor(switchp, TT_COLOR_SWITCH_CIRCLE_ON, TT_COLOR_OVERRIDE_SLOT_4);
                 turtleGoto(switchX + switchp -> size * 0.8, switchY);
             } else {
-                tt_internalColor(switchp, TT_COLOR_SWITCH_CIRCLE_OFF, TT_COLOR_OVERRIDE_SLOT_4);
+                tt_internalColor(switchp, TT_COLOR_SWITCH_CIRCLE_OFF, TT_COLOR_OVERRIDE_SLOT_5);
                 turtleGoto(switchX - switchp -> size * 0.8, switchY);
             }
             turtlePenDown();
             turtlePenUp();
-            /* mouse */
-            if (switchp -> enabled == TT_ELEMENT_ENABLED) {
-                if (turtleMouseDown()) {
-                    if (switchp -> status < 0) {
-                        switchp -> status *= -1;
-                    }
+            /* mouse parameters */
+            if (switchp -> style == TT_SWITCH_STYLE_CLASSIC) {
+                switchClickLeft = switchX - switchp -> size * 1.35;
+                switchClickRight = switchX + switchp -> size * 1.35;
+            } else if (switchp -> style == TT_SWITCH_STYLE_SIDESWIPE_LEFT) {
+                double textLength = turtleTextGetUnicodeLength((unsigned char *) switchp -> label, switchp -> size - 1);
+                switchClickLeft = switchX - switchp -> size * 1.35;
+                switchClickRight = switchX + switchp -> size * 2.2 + textLength;
+            } else {
+                double textLength = turtleTextGetUnicodeLength((unsigned char *) switchp -> label, switchp -> size - 1);
+                switchClickLeft = switchX - switchp -> size * 2 - textLength;
+                switchClickRight = switchX + switchp -> size * 1.35;
+            }
+            switchClickDown = switchY - switchp -> size * 0.6;
+            switchClickUp = switchY + switchp -> size * 0.6;
+            /* render text */
+            tt_internalColor(switchp, TT_COLOR_TEXT, TT_COLOR_OVERRIDE_SLOT_0);
+            if (switchp -> style == TT_SWITCH_STYLE_CLASSIC) {
+                turtleTextWriteUnicode((unsigned char *) switchp -> label, switchX, switchY + 1.6 * switchp -> size, switchp -> size - 1, 50);
+            } else if (switchp -> style == TT_SWITCH_STYLE_SIDESWIPE_LEFT) {
+                if (switchp -> status != 0) {
+                    tt_internalColor(switchp, TT_COLOR_SWITCH_TEXT_HOVER, TT_COLOR_OVERRIDE_SLOT_1);
                 } else {
-                    if (turtle.mouseX > switchX - switchp -> size * 1.35 && turtle.mouseX < switchX + switchp -> size * 1.35 && turtle.mouseY > switchY - switchp -> size * 0.6 && turtle.mouseY < switchY + switchp -> size * 0.6) {
-                        switchp -> status = -1;
-                    } else {
-                        switchp -> status = 0;
-                    }
+                    tt_internalColor(switchp, TT_COLOR_TEXT, TT_COLOR_OVERRIDE_SLOT_0);
                 }
-                if (switchp -> status > 0) {
-                    if (*(switchp -> variable)) {
-                        *(switchp -> variable) = 0;
-                    } else {
-                        *(switchp -> variable) = 1;
-                    }
-                    switchp -> status = 0;
+                turtleTextWriteUnicode((unsigned char *) switchp -> label, switchX + switchp -> size * 2, switchY, switchp -> size - 1, 0);
+            } else {
+                if (switchp -> status != 0) {
+                    tt_internalColor(switchp, TT_COLOR_SWITCH_TEXT_HOVER, TT_COLOR_OVERRIDE_SLOT_1);
+                } else {
+                    tt_internalColor(switchp, TT_COLOR_TEXT, TT_COLOR_OVERRIDE_SLOT_0);
                 }
+                turtleTextWriteUnicode((unsigned char *) switchp -> label, switchX - switchp -> size * 2, switchY, switchp -> size - 1, 100);
             }
         } else if (switchp -> style == TT_SWITCH_STYLE_CHECKBOX || switchp -> style == TT_SWITCH_STYLE_XBOX) {
-            tt_internalColor(switchp, TT_COLOR_SWITCH_OFF, TT_COLOR_OVERRIDE_SLOT_2);
+            /* render box */
+            tt_internalColor(switchp, TT_COLOR_SWITCH_OFF, TT_COLOR_OVERRIDE_SLOT_3);
             turtlePenSize(switchp -> size / 6);
             turtleGoto(switchX - switchp -> size / 2, switchY - switchp -> size / 2);
             turtlePenDown();
@@ -1238,10 +1271,16 @@ void switchUpdate() {
             turtlePenUp();
             if (*(switchp -> variable)) {
                 if (switchp -> style == TT_SWITCH_STYLE_CHECKBOX) {
-                    /* check */
+                    /* render check */
+                    tt_internalColor(switchp, TT_COLOR_SWITCH_CIRCLE_ON, TT_COLOR_OVERRIDE_SLOT_4);
+                    turtleGoto(switchX - switchp -> size / 2.5, switchY);
+                    turtlePenDown();
+                    turtleGoto(switchX, switchY - switchp -> size / 2.5);
+                    turtleGoto(switchX + switchp -> size / 2.5, switchY + switchp -> size / 2.5);
+                    turtlePenUp();
                 } else {
-                    /* X */
-                    tt_internalColor(switchp, TT_COLOR_SWITCH_CIRCLE_ON, TT_COLOR_OVERRIDE_SLOT_3);
+                    /* render X */
+                    tt_internalColor(switchp, TT_COLOR_SWITCH_CIRCLE_ON, TT_COLOR_OVERRIDE_SLOT_4);
                     turtleGoto(switchX + switchp -> size / 2.5, switchY + switchp -> size / 2.5);
                     turtlePenDown();
                     turtleGoto(switchX - switchp -> size / 2.5, switchY - switchp -> size / 2.5);
@@ -1251,6 +1290,41 @@ void switchUpdate() {
                     turtleGoto(switchX - switchp -> size / 2.5, switchY + switchp -> size / 2.5);
                     turtlePenUp();
                 }
+            }
+            /* mouse parameters - include text */
+            double textLength = turtleTextGetUnicodeLength((unsigned char *) switchp -> label, switchp -> size - 1);
+            switchClickLeft = switchX - switchp -> size * 0.6;
+            switchClickRight = switchX + switchp -> size * 1.2 + textLength;
+            switchClickDown = switchY - switchp -> size * 0.6;
+            switchClickUp = switchY + switchp -> size * 0.6;
+            /* render text */
+            if (switchp -> status != 0) {
+                tt_internalColor(switchp, TT_COLOR_SWITCH_TEXT_HOVER, TT_COLOR_OVERRIDE_SLOT_1);
+            } else {
+                tt_internalColor(switchp, TT_COLOR_TEXT, TT_COLOR_OVERRIDE_SLOT_0);
+            }
+            turtleTextWriteUnicode((unsigned char *) switchp -> label, switchX + switchp -> size, switchY, switchp -> size - 1, 0);
+        }
+        /* mouse */
+        if (switchp -> enabled == TT_ELEMENT_ENABLED) {
+            if (turtleMouseDown()) {
+                if (switchp -> status < 0) {
+                    switchp -> status *= -1;
+                }
+            } else {
+                if (turtle.mouseX > switchClickLeft && turtle.mouseX < switchClickRight && turtle.mouseY > switchClickDown && turtle.mouseY < switchClickUp) {
+                    switchp -> status = -1;
+                } else {
+                    switchp -> status = 0;
+                }
+            }
+            if (switchp -> status > 0) {
+                if (*(switchp -> variable)) {
+                    *(switchp -> variable) = 0;
+                } else {
+                    *(switchp -> variable) = 1;
+                }
+                switchp -> status = 0;
             }
         }
     }
@@ -1870,89 +1944,177 @@ void textboxKeyCallback(int32_t key, int32_t scancode, int32_t action) {
     }
 }
 
+int32_t textboxCalculateMaximumCharacters(uint32_t *charlist, int32_t textLength, double size, double lengthPixels, int8_t sweepDirection, double *outputLength) {
+    if (sweepDirection == -1) {
+        /* sweep from the back to the front */
+        size /= 175;
+        double xTrack = 0;
+        int32_t byteCount = 0;
+        for (int32_t i = 0; i < textLength; i++) {
+            int32_t currentDataAddress = 0;
+            for (int32_t j = 0; j < turtleTextRender.charCount; j++) {
+                if (turtleTextRender.supportedCharReference[j] == charlist[i]) {
+                    currentDataAddress = j;
+                    break;
+                }
+            }
+            xTrack += (turtleTextRender.fontData[turtleTextRender.fontPointer[currentDataAddress + 1] - 4] + 40) * size;
+            byteCount++;
+            if (charlist[i] & 0x0000FF00) {
+                byteCount++;
+                if (charlist[i] & 0x00FF0000) {
+                    byteCount++;
+                    if (charlist[i] & 0xFF000000) {
+                        byteCount++;
+                    }
+                }
+            }
+            if (xTrack - 40 * size > lengthPixels) {
+                *outputLength = xTrack - 40 * size;
+                return byteCount;
+            }
+        }
+        *outputLength = xTrack - 40 * size;
+        return byteCount;
+    } else if (sweepDirection == 1) {
+        /* sweep from the front to the back */
+        size /= 175;
+        double xTrack = 0;
+        int32_t byteCount = 0;
+        for (int32_t i = textLength - 1; i > 0; i--) {
+            int32_t currentDataAddress = 0;
+            for (int32_t j = 0; j < turtleTextRender.charCount; j++) {
+                if (turtleTextRender.supportedCharReference[j] == charlist[i]) {
+                    currentDataAddress = j;
+                    break;
+                }
+            }
+            xTrack += (turtleTextRender.fontData[turtleTextRender.fontPointer[currentDataAddress + 1] - 4] + 40) * size;
+            byteCount--;
+            if (charlist[i] & 0x0000FF00) {
+                byteCount--;
+                if (charlist[i] & 0x00FF0000) {
+                    byteCount--;
+                    if (charlist[i] & 0xFF000000) {
+                        byteCount--;
+                    }
+                }
+            }
+            if (xTrack - 40 * size > lengthPixels) {
+                *outputLength = xTrack - 40 * size;
+                return byteCount;
+            }
+        }
+        *outputLength = xTrack - 40 * size;
+        return byteCount;
+    }
+    return 0;
+}
+
 void textboxUpdate() {
     for (uint32_t i = 0; i < tt_elements.textboxes -> length; i++) {
         tt_textbox_t *textboxp = (tt_textbox_t *) (tt_elements.textboxes -> data[i].p);
         if (textboxp -> enabled == TT_ELEMENT_HIDE) {
             continue;
         }
-        // printf("editIndex: %d\n", textboxp -> editIndex);
+
+        /* handle keys */
+        if (textboxp -> keyTimeout > 0) {
+            textboxp -> keyTimeout--;
+        }
+        if (textboxp -> lastKey > 0) {
+            if (turtleKeyPressed(textboxp -> lastKey)) {
+                if (textboxp -> keyTimeout == 0) {
+                    textboxp -> keyTimeout = 4;
+                    textboxHandleOtherKey(textboxp, textboxp -> lastKey);
+                }
+            } else {
+                textboxp -> lastKey = 0;
+            }
+        }
+        if (textboxp -> status > 1) {
+            textboxp -> status++;
+            if (textboxp -> status > 128) {
+                textboxp -> status = 2;
+            }
+        }
+
         tt_internalColor(textboxp, TT_COLOR_TEXTBOX_BOX, TT_COLOR_OVERRIDE_SLOT_1);
         turtleRectangle(textboxp -> x, textboxp -> y - textboxp -> size, textboxp -> x + textboxp -> length, textboxp -> y + textboxp -> size);
 
         if (textboxp -> status <= 0) {
+            textboxp -> renderPixelOffset = textboxp -> size / 3;
+            textboxp -> renderStartingIndex = 0;
+            /* textbox idle */
             if (strlen(textboxp -> text) == 0) {
+                /* render label */
+                textboxp -> renderNumCharacters = 0;
                 tt_internalColor(textboxp, TT_COLOR_TEXTBOX_PHANTOM_TEXT, TT_COLOR_OVERRIDE_SLOT_2);
                 turtleTextWriteUnicode((unsigned char *) textboxp -> label, textboxp -> x + textboxp -> size / 2, textboxp -> y, textboxp -> size - 1, 0);
             } else {
-                tt_internalColor(textboxp, TT_COLOR_TEXT_ALTERNATE, TT_COLOR_OVERRIDE_SLOT_0);
-                double textLength = turtleTextGetUnicodeLength((unsigned char *) textboxp -> text, textboxp -> size - 1);
-                if (textLength > textboxp -> length - textboxp -> size / 1.5) {
-                    /* text is too big to fit in textbox */
-                    int32_t j = 0;
-                    while (textLength > textboxp -> length - textboxp -> size / 3) {
-                        j++;
-                        textLength = turtleTextGetUnicodeLength((unsigned char *) (textboxp -> text + j), textboxp -> size - 1);
-                    }
-                    turtleTextWriteUnicode((unsigned char *) (textboxp -> text + j), textboxp -> x + textboxp -> length - textboxp -> size / 3, textboxp -> y, textboxp -> size - 1, 100);
-                    tt_internalColor(textboxp, TT_COLOR_TEXTBOX_BOX, TT_COLOR_OVERRIDE_SLOT_1);
-                    turtleRectangle(textboxp -> x, textboxp -> y - textboxp -> size, textboxp -> x + textboxp -> size / 3, textboxp -> y + textboxp -> size);
+                /* calculate rendered characters */
+                double totalTextLength = turtleTextGetUnicodeLength((unsigned char *) textboxp -> text, textboxp -> size - 1);
+                if (totalTextLength < textboxp -> length - textboxp -> size / 1.5) {
+                    textboxp -> renderNumCharacters = strlen(textboxp -> text);
                 } else {
-                    turtleTextWriteUnicode((unsigned char *) textboxp -> text, textboxp -> x + textboxp -> size / 3, textboxp -> y, textboxp -> size - 1, 0);
+                    /* not all characters fit in textbox - retract text length */
+                    uint32_t textConverted[strlen(textboxp -> text) + 1];
+                    uint32_t characterLength = turtleTextConvertUnicode((unsigned char *) textboxp -> text, textConverted);
+                    double dummy;
+                    textboxp -> renderNumCharacters = textboxCalculateMaximumCharacters(textConverted, characterLength, textboxp -> size - 1, textboxp -> length - textboxp -> size * 1.2, -1, &dummy);
                 }
             }
         } else if (textboxp -> status > 0) {
-            tt_internalColor(textboxp, TT_COLOR_TEXT_ALTERNATE, TT_COLOR_OVERRIDE_SLOT_0);
-
-            double textLength = turtleTextGetUnicodeLength((unsigned char *) textboxp -> text, textboxp -> size - 1);
-            if (textLength > textboxp -> length - textboxp -> size / 1.5) {
-                /* text is too big to fit in textbox */
-                int32_t j = 0;
-                while (textLength > textboxp -> length - textboxp -> size / 3) {
-                    j++;
-                    textLength = turtleTextGetUnicodeLength((unsigned char *) (textboxp -> text + j), textboxp -> size - 1);
-                }
-                turtleTextWriteUnicode((unsigned char *) (textboxp -> text + j), textboxp -> x + textboxp -> length - textboxp -> size / 3, textboxp -> y, textboxp -> size - 1, 100);
-                if (textboxp -> status < 66) {
-                    char tempHold = textboxp -> text[textboxp -> editIndex - 1];
-                    textboxp -> text[textboxp -> editIndex - 1] = '\0';
-                    textLength = turtleTextGetUnicodeLength((unsigned char *) (textboxp -> text + textboxp -> editIndex), textboxp -> size - 1);
-                    textboxp -> text[textboxp -> editIndex - 1] = tempHold;
-                    tt_internalColor(textboxp, TT_COLOR_TEXTBOX_LINE, TT_COLOR_OVERRIDE_SLOT_3);
-                    turtleRectangle(textboxp -> x + textboxp -> length - textboxp -> size / 3 - textLength, textboxp -> y - textboxp -> size * 0.8, textboxp -> x + textboxp -> length - textboxp -> size / 3 - textLength + 1, textboxp -> y + textboxp -> size * 0.8);
-                }
-                tt_internalColor(textboxp, TT_COLOR_TEXTBOX_BOX, TT_COLOR_OVERRIDE_SLOT_1);
-                turtleRectangle(textboxp -> x, textboxp -> y - textboxp -> size, textboxp -> x + textboxp -> size / 3, textboxp -> y + textboxp -> size);
+            /* editing text */
+            /* calculate rendered characters */
+            double totalTextLength = turtleTextGetUnicodeLength((unsigned char *) textboxp -> text, textboxp -> size - 1);
+            if (totalTextLength < textboxp -> length - textboxp -> size / 1.5) {
+                textboxp -> renderStartingIndex = 0;
+                textboxp -> renderPixelOffset = textboxp -> size / 3;
+                textboxp -> renderNumCharacters = strlen(textboxp -> text);
             } else {
-                turtleTextWriteUnicode((unsigned char *) textboxp -> text, textboxp -> x + textboxp -> size / 3, textboxp -> y, textboxp -> size - 1, 0);
-                if (textboxp -> status < 66) {
-                    char tempHold = textboxp -> text[textboxp -> editIndex];
+                /* not all characters fit in textbox - retract text length */
+                if (textboxp -> editIndex < textboxp -> renderStartingIndex) {
+                    /* set editIndex at the left side of box */
+                    textboxp -> renderStartingIndex = textboxp -> editIndex;
+                    textboxp -> renderPixelOffset = textboxp -> size / 3;
+                    uint32_t textConverted[strlen(textboxp -> text) + 1];
+                    uint32_t characterLength = turtleTextConvertUnicode((unsigned char *) (textboxp -> text + textboxp -> editIndex), textConverted);
+                    double dummy;
+                    textboxp -> renderNumCharacters = textboxCalculateMaximumCharacters(textConverted, characterLength, textboxp -> size - 1, textboxp -> length - textboxp -> size * 1.2, -1, &dummy);
+                } else if (textboxp -> editIndex > textboxp -> renderStartingIndex + textboxp -> renderNumCharacters || (strlen(textboxp -> text) < textboxp -> renderStartingIndex + textboxp -> renderNumCharacters && strlen(textboxp -> text) == textboxp -> editIndex)) {
+                    /* set editIndex at the right side of box */
+                    char tempHold;
+                    tempHold = textboxp -> text[textboxp -> editIndex];
                     textboxp -> text[textboxp -> editIndex] = '\0';
-                    textLength = turtleTextGetUnicodeLength((unsigned char *) textboxp -> text, textboxp -> size - 1);
+                    uint32_t textConverted[strlen(textboxp -> text) + 1];
+                    uint32_t characterLength = turtleTextConvertUnicode((unsigned char *) textboxp -> text, textConverted);
+                    double textPixelLength;
+                    textboxp -> renderStartingIndex = strlen(textboxp -> text) + textboxCalculateMaximumCharacters(textConverted, characterLength, textboxp -> size - 1, textboxp -> length - textboxp -> size * 1.2, 1, &textPixelLength);
+                    textboxp -> renderNumCharacters = strlen(textboxp -> text) - textboxp -> renderStartingIndex;
+                    textboxp -> renderPixelOffset = textboxp -> length - textboxp -> size / 3 - textPixelLength;
                     textboxp -> text[textboxp -> editIndex] = tempHold;
-                    tt_internalColor(textboxp, TT_COLOR_TEXTBOX_LINE, TT_COLOR_OVERRIDE_SLOT_3);
-                    turtleRectangle(textboxp -> x + textboxp -> size / 3 + textLength, textboxp -> y - textboxp -> size * 0.8, textboxp -> x + textboxp -> size / 3 + textLength + 1, textboxp -> y + textboxp -> size * 0.8);
                 }
             }
-            if (textboxp -> keyTimeout > 0) {
-                textboxp -> keyTimeout--;
-            }
-            if (textboxp -> lastKey > 0) {
-                if (turtleKeyPressed(textboxp -> lastKey)) {
-                    if (textboxp -> keyTimeout == 0) {
-                        textboxp -> keyTimeout = 4;
-                        textboxHandleOtherKey(textboxp, textboxp -> lastKey);
-                    }
-                } else {
-                    textboxp -> lastKey = 0;
-                }
-            }
-            if (textboxp -> status > 1) {
-                textboxp -> status++;
-                if (textboxp -> status > 128) {
-                    textboxp -> status = 2;
-                }
-            }
+        }
+
+        /* draw text and occluding boxes */
+        char tempHold;
+        tempHold = textboxp -> text[textboxp -> renderStartingIndex + textboxp -> renderNumCharacters];
+        textboxp -> text[textboxp -> renderStartingIndex + textboxp -> renderNumCharacters] = '\0';
+        tt_internalColor(textboxp, TT_COLOR_TEXT_ALTERNATE, TT_COLOR_OVERRIDE_SLOT_0);
+        turtleTextWriteUnicode((unsigned char *) (textboxp -> text + textboxp -> renderStartingIndex), textboxp -> x + textboxp -> renderPixelOffset, textboxp -> y, textboxp -> size - 1, 0);
+        textboxp -> text[textboxp -> renderStartingIndex + textboxp -> renderNumCharacters] = tempHold;
+        tt_internalColor(textboxp, TT_COLOR_TEXTBOX_BOX, TT_COLOR_OVERRIDE_SLOT_1);
+        turtleRectangle(textboxp -> x, textboxp -> y - textboxp -> size, textboxp -> x + textboxp -> size / 4, textboxp -> y + textboxp -> size);
+        turtleRectangle(textboxp -> x + textboxp -> length, textboxp -> y - textboxp -> size, textboxp -> x + textboxp -> length - textboxp -> size / 4, textboxp -> y + textboxp -> size);
+        if (textboxp -> status > 0 && textboxp -> status < 66) {
+            char tempHold = textboxp -> text[textboxp -> editIndex];
+            textboxp -> text[textboxp -> editIndex] = '\0';
+            double textLength = turtleTextGetUnicodeLength((unsigned char *) (textboxp -> text + textboxp -> renderStartingIndex), textboxp -> size - 1);
+            textboxp -> text[textboxp -> editIndex] = tempHold;
+            tt_internalColor(textboxp, TT_COLOR_TEXTBOX_LINE, TT_COLOR_OVERRIDE_SLOT_3);
+            turtleRectangle(textboxp -> x + textboxp -> renderPixelOffset + textLength, textboxp -> y - textboxp -> size * 0.8, textboxp -> x + textboxp -> renderPixelOffset + textLength + 1, textboxp -> y + textboxp -> size * 0.8);
         }
 
         if (textboxp -> enabled == TT_ELEMENT_ENABLED) {
