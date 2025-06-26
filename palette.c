@@ -142,7 +142,7 @@ void init() {
         "TT_COLOR_TEXTBOX_LINE",
         "TT_COLOR_TEXTBOX_SELECT",
     };
-    for (uint32_t i = 0; i < sizeof(asciiCopy) / 32; i++) {
+    for (uint32_t i = 0; i < sizeof(asciiCopy) / 64; i++) {
         strcpy(self.asciiEnum[i], asciiCopy[i]);
     }
 
