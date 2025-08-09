@@ -109,7 +109,11 @@ void list_append(list_t *list, unitype data, char type) {
         list -> type = realloc(list -> type, list -> realLength);
         list -> data = realloc(list -> data, list -> realLength * sizeof(unitype));
     }
-    list -> type[list -> length] = type;
+    if (type == 'z') {
+        list -> type[list -> length] = 's';
+    } else {
+        list -> type[list -> length] = type;
+    }
     if (type == 's') {
         list -> data[list -> length].s = strdup(data.s);
     } else {
@@ -120,6 +124,10 @@ void list_append(list_t *list, unitype data, char type) {
 
 /* inserts the item value at list[index] of the list */
 void list_insert(list_t *list, int32_t index, unitype value, char type) {
+    if (list -> length == index) {
+        list_append(list, value, type);
+        return;
+    }
     while (index < 0) {index += list -> length;}
     index %= list -> length;
     list_append(list, (unitype) 0, type);
@@ -389,9 +397,7 @@ void unitype_fprint(FILE *fp, unitype item, char type) {
             fprintf(fp, "%p", item.p);
         break;
         case LIST_TYPE_LIST:
-            fputs("[", fp);
             list_fprint_emb(fp, item.r);
-            fputs("]", fp);
         break;
         default:
             printf("unitype_fprint - type %d not recognized\n", type);
@@ -411,7 +417,7 @@ void list_copy(list_t *dest, list_t *src) {
         dest -> type[i] = src -> type[i];
         if (src -> type[i] == 'r') {
             dest -> data[i] = (unitype) (void *) list_init();
-            list_copy(src -> data[i].r, dest -> data[i].r);
+            list_copy(dest -> data[i].r, src -> data[i].r);
         } else {
             if (src -> type[i] == 'p') {
                 memcpy(dest -> data[i].p, src -> data[i].p, sizeof(unitype));
