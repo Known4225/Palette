@@ -9,6 +9,7 @@
 77.0, 34.0, 6.0,     // popup boxes select color (24)
 112.0, 79.0, 51.0,   // button color (27)
 79.0, 36.0, 8.0,     // button select color (30)
+79.0, 36.0, 8.0,     // button select color (30)
 112.0, 79.0, 51.0,   // switch color off (33)
 94.0, 51.0, 23.0,    // switch circle color off (36)
 112.0, 79.0, 51.0,   // switch color on (39)

@@ -1,8 +1,16 @@
+/* how to edit for new colors:
+- Edit turtleTools.h file with new changes
+- Change NUMBER_OF_BOXES
+- Add relevant names to asciiCopy in init function
+- Change messages in export function
+- 
+*/
+
 #include "include/turtleTools.h"
 #include "include/osTools.h"
 #include <time.h>
 
-#define NUMBER_OF_BOXES 28
+#define NUMBER_OF_BOXES 34
 
 /* box */
 typedef struct {
@@ -49,7 +57,8 @@ palette_t self;
 tt_popup_t fakePopup;
 
 /* UI variables */
-int32_t buttonVar, switchVar = 0, dropdownVar = 0, dropdownVar2 = 0;
+int8_t buttonVar = 0, switchVar = 0;
+int32_t dropdownVar = 0, dropdownVar2 = 0;
 double dialVar = 0.0, sliderVar = 0.0, scrollbarVar = 0.0;
 
 void init() {
@@ -68,7 +77,7 @@ void init() {
     list_append(dropdownOptions2, (unitype) "Go", 's');
     double UIX = 200;
     double UIY = 100;
-    buttonInit("button", &buttonVar, TT_BUTTON_SHAPE_RECTANGLE, UIX, UIY, 10);
+    buttonInit("button", &buttonVar, UIX, UIY, 10);
     switchInit("switch", &switchVar, UIX, UIY - 40, 10);
     dialInit("dial", &dialVar, TT_DIAL_EXP, UIX, UIY - 80, 10, 0, 1000, 1);
     sliderInit("slider", &sliderVar, TT_SLIDER_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, UIX, UIY - 120, 10, 50, 0, 10, 1);
@@ -119,6 +128,8 @@ void init() {
         "TT_COLOR_POPUP_BUTTON_SELECT",
         "TT_COLOR_BUTTON",
         "TT_COLOR_BUTTON_SELECT",
+        "TT_COLOR_BUTTON_CLICKED",
+        "TT_COLOR_SWITCH_TEXT_HOVER",
         "TT_COLOR_SWITCH_OFF",
         "TT_COLOR_SWITCH_CIRCLE_OFF",
         "TT_COLOR_SWITCH_ON",
@@ -135,6 +146,10 @@ void init() {
         "TT_COLOR_DROPDOWN_SELECT",
         "TT_COLOR_DROPDOWN_HOVER",
         "TT_COLOR_DROPDOWN_TRIANGLE",
+        "TT_COLOR_TEXTBOX_BOX",
+        "TT_COLOR_TEXTBOX_PHANTOM_TEXT",
+        "TT_COLOR_TEXTBOX_LINE",
+        "TT_COLOR_TEXTBOX_SELECT",
     };
     for (uint32_t i = 0; i < sizeof(asciiCopy) / 32; i++) {
         strcpy(self.asciiEnum[i], asciiCopy[i]);
@@ -420,22 +435,23 @@ void export(const char *filename) {
         "// popup boxes select color (24)",
         "// button color (27)",
         "// button select color (30)",
-        "// switch color off (33)",
-        "// switch circle color off (36)",
-        "// switch color on (39)",
-        "// switch circle color on (42)",
-        "// dial color (45)",
-        "// dial inner circle color (48)",
-        "// slider bar color (51)",
-        "// slider circle color (54)",
-        "// scrollbar bar base color (57)",
-        "// scrollbar bar color (60)",
-        "// scrollbar bar hover color (63)",
-        "// scrollbar bar clicked color (66)",
-        "// dropdown color (69)",
-        "// dropdown select color (72)",
-        "// dropdown hover color (75)",
-        "// dropdown triangle color (78)",
+        "// button clicked color (33)",
+        "// switch color off (36)",
+        "// switch circle color off (39)",
+        "// switch color on (42)",
+        "// switch circle color on (45)",
+        "// dial color (48)",
+        "// dial inner circle color (51)",
+        "// slider bar color (54)",
+        "// slider circle color (57)",
+        "// scrollbar bar base color (60)",
+        "// scrollbar bar color (63)",
+        "// scrollbar bar hover color (66)",
+        "// scrollbar bar clicked color (69)",
+        "// dropdown color (72)",
+        "// dropdown select color (75)",
+        "// dropdown hover color (78)",
+        "// dropdown triangle color (81)",
     };
     for (uint32_t i = 0; i < NUMBER_OF_BOXES - 1; i++) {
         char line[128];
@@ -832,10 +848,8 @@ void parseRibbonOutput() {
                 printf("Change theme\n");
                 if (tt_theme == TT_THEME_DARK) {
                     turtleBgColor(180, 180, 180);
-                    turtleToolsLightTheme();
                 } else {
                     turtleBgColor(30, 30, 30);
-                    turtleToolsDarkTheme();
                 }
             } 
             if (ribbonRender.output[2] == 2) { // GLFW
@@ -866,7 +880,7 @@ void parsePopupOutput(GLFWwindow *window) {
             glfwSetWindowShouldClose(window, 0);
         }
         if (popup.output[1] == 2) { // close
-            turtle.shouldClose = 1;
+            turtle.popupClose = 1;
         }
     }
 }
@@ -921,7 +935,7 @@ int main(int argc, char *argv[]) {
         import(osToolsFileDialog.selectedFilename);
     }
 
-    while (turtle.shouldClose == 0) {
+    while (turtle.popupClose == 0) {
         start = clock();
         turtleGetMouseCoords();
         turtleClear();
@@ -935,7 +949,7 @@ int main(int argc, char *argv[]) {
         mouseTick();
         /* override popup if saved */
         if (turtle.close == 1 && self.saved == 1) {
-            turtle.shouldClose = 1;
+            turtle.popupClose = 1;
             turtleFree();
             glfwTerminate();
             return 0;
