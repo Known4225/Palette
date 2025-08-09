@@ -85,7 +85,7 @@ void init() {
     scrollbarInit(&scrollbarVar, TT_SCROLLBAR_VERTICAL, 310, 0, 10, 320, 90);
     dropdownInit("dropdown", dropdownOptions, &dropdownVar, TT_DROPDOWN_ALIGN_CENTER, UIX, UIY - 200, 10);
     dropdownInit("dropdown", dropdownOptions2, &dropdownVar2, TT_DROPDOWN_ALIGN_CENTER, UIX, UIY - 165, 10);
-    textboxInit("textbox", 128, 50, -100, 10, 100);
+    textboxInit("textbox", 128, 150, 130, 10, 100);
     double boxSliderCopy[] = {
         0.0, 0.0, 0.0,       // override slider text
         0.0, 0.0, 0.0,       // override slider bar
@@ -437,26 +437,27 @@ void export(const char *filename) {
         "// button color (27)",
         "// button select color (30)",
         "// button clicked color (33)",
-        "// switch color off (36)",
-        "// switch circle color off (39)",
-        "// switch color on (42)",
-        "// switch circle color on (45)",
-        "// dial color (48)",
-        "// dial inner circle color (51)",
-        "// slider bar color (54)",
-        "// slider circle color (57)",
-        "// scrollbar bar base color (60)",
-        "// scrollbar bar color (63)",
-        "// scrollbar bar hover color (66)",
-        "// scrollbar bar clicked color (69)",
-        "// dropdown color (72)",
-        "// dropdown select color (75)",
-        "// dropdown hover color (78)",
-        "// dropdown triangle color (81)",
-        "// textbox color (84)",
-        "// textbox phantom text color (87)",
-        "// textbox line color (90)",
-        "// textbox select color (93)",
+        "// switch text hover (36)",
+        "// switch color off (39)",
+        "// switch circle color off (42)",
+        "// switch color on (45)",
+        "// switch circle color on (48)",
+        "// dial color (51)",
+        "// dial inner circle color (54)",
+        "// slider bar color (57)",
+        "// slider circle color (60)",
+        "// scrollbar bar base color (63)",
+        "// scrollbar bar color (66)",
+        "// scrollbar bar hover color (69)",
+        "// scrollbar bar clicked color (72)",
+        "// dropdown color (75)",
+        "// dropdown select color (78)",
+        "// dropdown hover color (81)",
+        "// dropdown triangle color (84)",
+        "// textbox color (87)",
+        "// textbox phantom text color (90)",
+        "// textbox line color (93)",
+        "// textbox select color (96)",
     };
     for (uint32_t i = 0; i < NUMBER_OF_BOXES - 1; i++) {
         char line[128];
