@@ -37,7 +37,7 @@ typedef struct {
     box_t boxes[NUMBER_OF_BOXES];
     double newColorPalette[NUMBER_OF_BOXES * 6];
     char lockOffsets;
-    char asciiEnum[NUMBER_OF_BOXES][32];
+    char asciiEnum[NUMBER_OF_BOXES][64];
     double boxSliderColors[9];
     double boxSliderColorsAlt[9];
     list_t *undoList;
@@ -85,6 +85,7 @@ void init() {
     scrollbarInit(&scrollbarVar, TT_SCROLLBAR_VERTICAL, 310, 0, 10, 320, 90);
     dropdownInit("dropdown", dropdownOptions, &dropdownVar, TT_DROPDOWN_ALIGN_CENTER, UIX, UIY - 200, 10);
     dropdownInit("dropdown", dropdownOptions2, &dropdownVar2, TT_DROPDOWN_ALIGN_CENTER, UIX, UIY - 165, 10);
+    textboxInit("textbox", 128, 50, -100, 10, 100);
     double boxSliderCopy[] = {
         0.0, 0.0, 0.0,       // override slider text
         0.0, 0.0, 0.0,       // override slider bar
@@ -115,7 +116,7 @@ void init() {
     for (uint32_t i = 0; i < NUMBER_OF_BOXES; i++) {
         strcpy(self.asciiEnum[i], "NULL");
     }
-    char asciiCopy[][32] = {
+    char asciiCopy[][64] = {
         "BACKGROUND",
         "TT_COLOR_TEXT",
         "TT_COLOR_TEXT_ALTERNATE",
@@ -151,7 +152,7 @@ void init() {
         "TT_COLOR_TEXTBOX_LINE",
         "TT_COLOR_TEXTBOX_SELECT",
     };
-    for (uint32_t i = 0; i < sizeof(asciiCopy) / 32; i++) {
+    for (uint32_t i = 0; i < sizeof(asciiCopy) / 64; i++) {
         strcpy(self.asciiEnum[i], asciiCopy[i]);
     }
 
@@ -452,6 +453,10 @@ void export(const char *filename) {
         "// dropdown select color (75)",
         "// dropdown hover color (78)",
         "// dropdown triangle color (81)",
+        "// textbox color (84)",
+        "// textbox phantom text color (87)",
+        "// textbox line color (90)",
+        "// textbox select color (93)",
     };
     for (uint32_t i = 0; i < NUMBER_OF_BOXES - 1; i++) {
         char line[128];

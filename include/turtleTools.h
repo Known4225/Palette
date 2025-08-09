@@ -34,7 +34,10 @@ char *strins(char *dest, char *source, int32_t index) {
     return dest;
 }
 
+<<<<<<< HEAD
 /* delete a section of a string */
+=======
+>>>>>>> 65f6fd701560acc3f3477e0b89917bdf2a6bcf28
 char *strdel(char *dest, int32_t index, int32_t size) {
     int32_t len = strlen(dest);
     memmove(dest + index, dest + index + size, len - index - size);
@@ -104,6 +107,7 @@ typedef enum {
     TT_COLOR_POPUP_BUTTON_SELECT = 24,
     TT_COLOR_BUTTON = 27,
     TT_COLOR_BUTTON_SELECT = 30,
+<<<<<<< HEAD
     TT_COLOR_BUTTON_CLICKED = 33,
     TT_COLOR_SWITCH_TEXT_HOVER = 36,
     TT_COLOR_SWITCH_OFF = 39,
@@ -126,6 +130,29 @@ typedef enum {
     TT_COLOR_TEXTBOX_PHANTOM_TEXT = 90,
     TT_COLOR_TEXTBOX_LINE = 93,
     TT_COLOR_TEXTBOX_SELECT = 96,
+=======
+    TT_COLOR_SWITCH_TEXT_HOVER = 33,
+    TT_COLOR_SWITCH_OFF = 36,
+    TT_COLOR_SWITCH_CIRCLE_OFF = 39,
+    TT_COLOR_SWITCH_ON = 42,
+    TT_COLOR_SWITCH_CIRCLE_ON = 45,
+    TT_COLOR_DIAL = 48,
+    TT_COLOR_DIAL_INNER = 51,
+    TT_COLOR_SLIDER_BAR = 54,
+    TT_COLOR_SLIDER_CIRCLE = 57,
+    TT_COLOR_SCROLLBAR_BASE = 60,
+    TT_COLOR_SCROLLBAR_BAR = 63,
+    TT_COLOR_SCROLLBAR_HOVER = 66,
+    TT_COLOR_SCROLLBAR_CLICKED = 69,
+    TT_COLOR_DROPDOWN = 72,
+    TT_COLOR_DROPDOWN_SELECT = 75,
+    TT_COLOR_DROPDOWN_HOVER = 78,
+    TT_COLOR_DROPDOWN_TRIANGLE = 81,
+    TT_COLOR_TEXTBOX_BOX = 84,
+    TT_COLOR_TEXTBOX_PHANTOM_TEXT = 87,
+    TT_COLOR_TEXTBOX_LINE = 90,
+    TT_COLOR_TEXTBOX_SELECT = 93,
+>>>>>>> 65f6fd701560acc3f3477e0b89917bdf2a6bcf28
 } tt_theme_internal_t;
 
 /* default colours (light theme) */
@@ -247,6 +274,7 @@ void turtleToolsSetTheme(tt_theme_name_t theme) {
         tt_theme = theme;
         double tt_themeCopy[] = {
             3.0, 3.0, 3.0,       // text color (0)
+<<<<<<< HEAD
             241.0, 239.0, 236.0, // text color alternate (3)
             21.2, 115.6, 160.2,  // ribbon top bar color (6)
             74.0, 108.0, 144.0,  // ribbon dropdown color (9)
@@ -278,6 +306,39 @@ void turtleToolsSetTheme(tt_theme_name_t theme) {
             112.0, 146.0, 182.0, // textbox phantom text color (87)
             241.0, 239.0, 236.0, // textbox line color (90)
             11.0, 87.0, 208.0,   // textbox select color (93)
+=======
+        241.0, 239.0, 236.0, // text color alternate (3)
+        21.2, 115.6, 160.2,  // ribbon top bar color (6)
+        74.0, 108.0, 144.0,  // ribbon dropdown color (9)
+        112.0, 146.0, 182.0, // ribbon select color (12)
+        112.0, 146.0, 182.0, // ribbon hover color (15)
+        18.0, 52.0, 88.0,    // popup box color (18)
+        74.0, 108.0, 144.0,  // popup boxes color (21)
+        126.0, 160.0, 196.0, // popup boxes select color (24)
+        18.0, 52.0, 88.0,    // button color (27)
+        74.0, 108.0, 144.0,  // button select color (30)
+        18.0, 52.0, 88.0,    // switch text hover (33)
+        18.0, 52.0, 88.0,    // switch color off (36)
+        241.0, 239.0, 236.0, // switch circle color off (39)
+        18.0, 52.0, 88.0,    // switch color on (42)
+        241.0, 239.0, 236.0, // switch circle color on (45)
+        3.0, 3.0, 3.0,       // dial color (48)
+        212.0, 201.0, 190.0, // dial inner circle color (51)
+        18.0, 52.0, 88.0,    // slider bar color (54)
+        241.0, 239.0, 236.0, // slider circle color (57)
+        241.0, 239.0, 236.0, // scrollbar bar base color (60)
+        33.6, 161.9, 211.6,  // scrollbar bar color (63)
+        50.0, 178.3, 228.0,  // scrollbar bar hover color (66)
+        50.0, 178.3, 228.0,  // scrollbar bar clicked color (69)
+        18.0, 52.0, 88.0,    // dropdown color (72)
+        74.0, 108.0, 144.0,  // dropdown select color (75)
+        74.0, 108.0, 144.0,  // dropdown hover color (78)
+        241.0, 239.0, 236.0, // dropdown triangle color (81)
+        18.0, 52.0, 88.0,    // textbox color (84)
+        112.0, 146.0, 182.0, // textbox phantom text color (87)
+        241.0, 239.0, 236.0, // textbox line color (90)
+        11.0, 87.0, 208.0,   // textbox select color (93)
+>>>>>>> 65f6fd701560acc3f3477e0b89917bdf2a6bcf28
         };
         memcpy(tt_themeColors, tt_themeCopy, sizeof(tt_themeCopy));
     } else {
@@ -848,8 +909,13 @@ int32_t tt_color_override_default[] = {
     TT_COLOR_TEXT_ALTERNATE, TT_COLOR_TEXT,              TT_COLOR_TEXT,       TT_COLOR_TEXT,          0,                          TT_COLOR_TEXT,              TT_COLOR_TEXT_ALTERNATE,
     TT_COLOR_BUTTON,         TT_COLOR_SWITCH_TEXT_HOVER, TT_COLOR_DIAL,       TT_COLOR_SLIDER_BAR,    TT_COLOR_SCROLLBAR_BASE,    TT_COLOR_TEXT_ALTERNATE,    TT_COLOR_TEXTBOX_BOX,
     TT_COLOR_BUTTON_SELECT,  TT_COLOR_SWITCH_ON,         TT_COLOR_DIAL_INNER, TT_COLOR_SLIDER_CIRCLE, TT_COLOR_SCROLLBAR_HOVER,   TT_COLOR_DROPDOWN,          TT_COLOR_TEXTBOX_PHANTOM_TEXT,
+<<<<<<< HEAD
     TT_COLOR_TEXT,           TT_COLOR_SWITCH_OFF,        0,                   0,                      TT_COLOR_SCROLLBAR_CLICKED, TT_COLOR_DROPDOWN_SELECT,   TT_COLOR_TEXTBOX_LINE,
     TT_COLOR_BUTTON_CLICKED, TT_COLOR_SWITCH_CIRCLE_ON,  0,                   0,                      TT_COLOR_SCROLLBAR_BAR,     TT_COLOR_DROPDOWN_HOVER,    TT_COLOR_TEXTBOX_SELECT,
+=======
+    0,                       TT_COLOR_SWITCH_OFF,        0,                   0,                      TT_COLOR_SCROLLBAR_CLICKED, TT_COLOR_DROPDOWN_SELECT,   TT_COLOR_TEXTBOX_LINE,
+    0,                       TT_COLOR_SWITCH_CIRCLE_ON,  0,                   0,                      TT_COLOR_SCROLLBAR_BAR,     TT_COLOR_DROPDOWN_HOVER,    TT_COLOR_TEXTBOX_SELECT,
+>>>>>>> 65f6fd701560acc3f3477e0b89917bdf2a6bcf28
     0,                       TT_COLOR_SWITCH_CIRCLE_OFF, 0,                   0,                      0,                          TT_COLOR_DROPDOWN_TRIANGLE, 0,
     0,                       0,                          0,                   0,                      0,                          0,                          0,
     0,                       0,                          0,                   0,                      0,                          0,                          0,
@@ -1189,6 +1255,7 @@ void buttonUpdate() {
             turtleGoto(buttonX - buttonWidth / 2 + buttonp -> size / 2, buttonY - buttonHeight / 2 + buttonp -> size / 2);
             turtlePenUp();
             turtleRectangle(buttonX - buttonWidth / 4, buttonY - buttonHeight / 4, buttonX + buttonWidth / 4, buttonY + buttonHeight / 4);
+<<<<<<< HEAD
         } else if (buttonp -> shape == TT_BUTTON_SHAPE_CIRCLE) {
             turtleGoto(buttonX, buttonY);
             turtlePenSize(buttonWidth);
@@ -1231,6 +1298,29 @@ void buttonUpdate() {
                 // buttonp -> status = 0;
             }
         }
+=======
+        }
+        tt_internalColor(buttonp, TT_COLOR_TEXT_ALTERNATE, TT_COLOR_OVERRIDE_SLOT_0);
+        turtleTextWriteUnicode((unsigned char *) buttonp -> label, buttonX, buttonY, buttonp -> size - 1, 50);
+        if (buttonp -> enabled == TT_ELEMENT_ENABLED) {
+            if (turtleMouseDown()) {
+                if (buttonp -> status < 0) {
+                    buttonp -> status *= -1;
+                }
+            } else {
+                if (turtle.mouseX > buttonX - buttonWidth / 2 && turtle.mouseX < buttonX + buttonWidth / 2 && turtle.mouseY > buttonY - buttonHeight / 2 && turtle.mouseY < buttonY + buttonHeight / 2) {
+                    buttonp -> status = -1;
+                } else {
+                    buttonp -> status = 0;
+                }
+            }
+            *(buttonp -> variable) = 0;
+            if (buttonp -> status > 0) {
+                *(buttonp -> variable) = 1;
+                buttonp -> status = 0;
+            }
+        }
+>>>>>>> 65f6fd701560acc3f3477e0b89917bdf2a6bcf28
     }
 }
 
@@ -1288,14 +1378,22 @@ void switchUpdate() {
             if (switchp -> style == TT_SWITCH_STYLE_CLASSIC) {
                 turtleTextWriteUnicode((unsigned char *) switchp -> label, switchX, switchY + 1.6 * switchp -> size, switchp -> size - 1, 50);
             } else if (switchp -> style == TT_SWITCH_STYLE_SIDESWIPE_LEFT) {
+<<<<<<< HEAD
                 if (switchp -> status == -1) {
+=======
+                if (switchp -> status != 0) {
+>>>>>>> 65f6fd701560acc3f3477e0b89917bdf2a6bcf28
                     tt_internalColor(switchp, TT_COLOR_SWITCH_TEXT_HOVER, TT_COLOR_OVERRIDE_SLOT_1);
                 } else {
                     tt_internalColor(switchp, TT_COLOR_TEXT, TT_COLOR_OVERRIDE_SLOT_0);
                 }
                 turtleTextWriteUnicode((unsigned char *) switchp -> label, switchX + switchp -> size * 2, switchY, switchp -> size - 1, 0);
             } else {
+<<<<<<< HEAD
                 if (switchp -> status == -1) {
+=======
+                if (switchp -> status != 0) {
+>>>>>>> 65f6fd701560acc3f3477e0b89917bdf2a6bcf28
                     tt_internalColor(switchp, TT_COLOR_SWITCH_TEXT_HOVER, TT_COLOR_OVERRIDE_SLOT_1);
                 } else {
                     tt_internalColor(switchp, TT_COLOR_TEXT, TT_COLOR_OVERRIDE_SLOT_0);
@@ -1304,8 +1402,11 @@ void switchUpdate() {
             }
         } else if (switchp -> style == TT_SWITCH_STYLE_CHECKBOX || switchp -> style == TT_SWITCH_STYLE_XBOX) {
             /* render box */
+<<<<<<< HEAD
             tt_internalColor(switchp, TT_COLOR_SWITCH_ON, TT_COLOR_OVERRIDE_SLOT_2);
             turtleRectangle(switchX - switchp -> size / 2, switchY - switchp -> size / 2, switchX + switchp -> size / 2, switchY + switchp -> size / 2);
+=======
+>>>>>>> 65f6fd701560acc3f3477e0b89917bdf2a6bcf28
             tt_internalColor(switchp, TT_COLOR_SWITCH_OFF, TT_COLOR_OVERRIDE_SLOT_3);
             turtlePenSize(switchp -> size / 6);
             turtleGoto(switchX - switchp -> size / 2, switchY - switchp -> size / 2);
@@ -1344,7 +1445,11 @@ void switchUpdate() {
             switchClickDown = switchY - switchp -> size * 0.6;
             switchClickUp = switchY + switchp -> size * 0.6;
             /* render text */
+<<<<<<< HEAD
             if (switchp -> status == -1) {
+=======
+            if (switchp -> status != 0) {
+>>>>>>> 65f6fd701560acc3f3477e0b89917bdf2a6bcf28
                 tt_internalColor(switchp, TT_COLOR_SWITCH_TEXT_HOVER, TT_COLOR_OVERRIDE_SLOT_1);
             } else {
                 tt_internalColor(switchp, TT_COLOR_TEXT, TT_COLOR_OVERRIDE_SLOT_0);
@@ -1352,7 +1457,11 @@ void switchUpdate() {
             turtleTextWriteUnicode((unsigned char *) switchp -> label, switchX + switchp -> size, switchY, switchp -> size - 1, 0);
         }
         /* mouse */
+<<<<<<< HEAD
         if (switchp -> enabled == TT_ELEMENT_ENABLED && ribbonRender.mainselect[2] == -1) {
+=======
+        if (switchp -> enabled == TT_ELEMENT_ENABLED) {
+>>>>>>> 65f6fd701560acc3f3477e0b89917bdf2a6bcf28
             if (turtleMouseDown()) {
                 if (switchp -> status < 0) {
                     switchp -> status *= -1;
@@ -1422,8 +1531,12 @@ void dialUpdate() {
         }
         turtleGoto(dialX + sin(dialAngle / 57.2958) * dialp -> size, dialY + cos(dialAngle / 57.2958) * dialp -> size);
         turtlePenUp();
+<<<<<<< HEAD
         /* mouse */
         if (dialp -> enabled == TT_ELEMENT_ENABLED && ribbonRender.mainselect[2] == -1) {
+=======
+        if (dialp -> enabled == TT_ELEMENT_ENABLED) {
+>>>>>>> 65f6fd701560acc3f3477e0b89917bdf2a6bcf28
             if (turtleMouseDown()) {
                 if (dialp -> status[0] < 0) {
                     tt_globals.dialAnchorX = dialX;
@@ -1553,8 +1666,12 @@ void sliderUpdate() {
         }
         turtlePenDown();
         turtlePenUp();
+<<<<<<< HEAD
         /* mouse */
         if (sliderp -> enabled == TT_ELEMENT_ENABLED && ribbonRender.mainselect[2] == -1) {
+=======
+        if (sliderp -> enabled == TT_ELEMENT_ENABLED) {
+>>>>>>> 65f6fd701560acc3f3477e0b89917bdf2a6bcf28
             if (turtleMouseDown()) {
                 if (sliderp -> status < 0) {
                     sliderp -> status *= -1;
@@ -1681,8 +1798,12 @@ void scrollbarUpdate() {
             turtlePenDown();
             turtleGoto(scrollbarp -> x, dragBottom);
             turtlePenUp();
+<<<<<<< HEAD
             /* mouse */
             if (scrollbarp -> enabled == TT_ELEMENT_ENABLED && ribbonRender.mainselect[2] == -1) {
+=======
+            if (scrollbarp -> enabled == TT_ELEMENT_ENABLED) {
+>>>>>>> 65f6fd701560acc3f3477e0b89917bdf2a6bcf28
                 if (scrollbarp -> status == 2) {
                     tt_globals.barAnchor = dragTop - turtle.mouseY;
                     scrollbarp -> status = 1;
@@ -1776,8 +1897,12 @@ void dropdownUpdate() {
             tt_internalColor(dropdownp, TT_COLOR_DROPDOWN, TT_COLOR_OVERRIDE_SLOT_2);
             turtleRectangle(dropdownXFactor[0], dropdownY - dropdownp -> size * 0.7, dropdownXFactor[1] + dropdownp -> size, dropdownY + dropdownp -> size * 0.7);
         }
+<<<<<<< HEAD
         /* mouse */
         if (dropdownp -> enabled == TT_ELEMENT_ENABLED && ribbonRender.mainselect[2] == -1) {
+=======
+        if (dropdownp -> enabled == TT_ELEMENT_ENABLED) {
+>>>>>>> 65f6fd701560acc3f3477e0b89917bdf2a6bcf28
             if (turtle.mouseX > dropdownXFactor[0] && turtle.mouseX < dropdownXFactor[1] + dropdownp -> size && turtle.mouseY > dropdownY - dropdownp -> size * 0.7 && turtle.mouseY < dropdownY + dropdownp -> size * 0.7) {
                 if (!turtleMouseDown() && dropdownp -> status == 0) {
                     dropdownp -> status = -1;
@@ -2002,13 +2127,22 @@ int32_t textboxCalculateMaximumCharacters(uint32_t *charlist, int32_t textLength
         int32_t byteCount = 0;
         for (int32_t i = 0; i < textLength; i++) {
             int32_t currentDataAddress = 0;
+<<<<<<< HEAD
             for (int32_t j = 0; j < turtleText.charCount; j++) {
                 if (turtleText.supportedCharReference[j] == charlist[i]) {
+=======
+            for (int32_t j = 0; j < turtleTextRender.charCount; j++) {
+                if (turtleTextRender.supportedCharReference[j] == charlist[i]) {
+>>>>>>> 65f6fd701560acc3f3477e0b89917bdf2a6bcf28
                     currentDataAddress = j;
                     break;
                 }
             }
+<<<<<<< HEAD
             xTrack += (turtleText.fontData[turtleText.fontPointer[currentDataAddress + 1] - 4] + 40) * size;
+=======
+            xTrack += (turtleTextRender.fontData[turtleTextRender.fontPointer[currentDataAddress + 1] - 4] + 40) * size;
+>>>>>>> 65f6fd701560acc3f3477e0b89917bdf2a6bcf28
             byteCount++;
             if (charlist[i] & 0x0000FF00) {
                 byteCount++;
@@ -2033,13 +2167,22 @@ int32_t textboxCalculateMaximumCharacters(uint32_t *charlist, int32_t textLength
         int32_t byteCount = 0;
         for (int32_t i = textLength - 1; i > 0; i--) {
             int32_t currentDataAddress = 0;
+<<<<<<< HEAD
             for (int32_t j = 0; j < turtleText.charCount; j++) {
                 if (turtleText.supportedCharReference[j] == charlist[i]) {
+=======
+            for (int32_t j = 0; j < turtleTextRender.charCount; j++) {
+                if (turtleTextRender.supportedCharReference[j] == charlist[i]) {
+>>>>>>> 65f6fd701560acc3f3477e0b89917bdf2a6bcf28
                     currentDataAddress = j;
                     break;
                 }
             }
+<<<<<<< HEAD
             xTrack += (turtleText.fontData[turtleText.fontPointer[currentDataAddress + 1] - 4] + 40) * size;
+=======
+            xTrack += (turtleTextRender.fontData[turtleTextRender.fontPointer[currentDataAddress + 1] - 4] + 40) * size;
+>>>>>>> 65f6fd701560acc3f3477e0b89917bdf2a6bcf28
             byteCount--;
             if (charlist[i] & 0x0000FF00) {
                 byteCount--;
@@ -2167,8 +2310,12 @@ void textboxUpdate() {
             turtleRectangle(textboxp -> x + textboxp -> renderPixelOffset + textLength, textboxp -> y - textboxp -> size * 0.8, textboxp -> x + textboxp -> renderPixelOffset + textLength + 1, textboxp -> y + textboxp -> size * 0.8);
         }
 
+<<<<<<< HEAD
         /* mouse */
         if (textboxp -> enabled == TT_ELEMENT_ENABLED && ribbonRender.mainselect[2] == -1) {
+=======
+        if (textboxp -> enabled == TT_ELEMENT_ENABLED) {
+>>>>>>> 65f6fd701560acc3f3477e0b89917bdf2a6bcf28
             if (turtleMouseDown()) {
                 if (textboxp -> status < 0) {
                     textboxp -> editIndex = strlen(textboxp -> text);

@@ -521,6 +521,31 @@ void turtleTriangleColor(double x1, double y1, double x2, double y2, double x3, 
     list_append(turtle.penPos, (unitype) 0, 'd'); // zero'd out (wasted space)
 }
 
+<<<<<<< HEAD
+=======
+/* draws a quadrilateral */
+void turtleQuadRender(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double r, double g, double b, double a, double xfact, double yfact) {
+    int8_t colorChange = 0;
+    if (r != turtle.currentColor[0]) {colorChange = 1;}
+    if (g != turtle.currentColor[1]) {colorChange = 1;}
+    if (b != turtle.currentColor[2]) {colorChange = 1;}
+    if (a != turtle.currentColor[3]) {colorChange = 1;}
+    if (colorChange == 1) {
+        glColor4d(r, g, b, a);
+        turtle.currentColor[0] = r;
+        turtle.currentColor[1] = g;
+        turtle.currentColor[2] = b;
+        turtle.currentColor[3] = a;
+    }
+    glBegin(GL_TRIANGLE_FAN);
+    glVertex2d(x1 * xfact, y1 * yfact);
+    glVertex2d(x2 * xfact, y2 * yfact);
+    glVertex2d(x3 * xfact, y3 * yfact);
+    glVertex2d(x4 * xfact, y4 * yfact);
+    glEnd();
+}
+
+>>>>>>> 65f6fd701560acc3f3477e0b89917bdf2a6bcf28
 /* adds a (blit) quad to the pipeline (for better speed) */
 void turtleQuad(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4) {
     list_append(turtle.penPos, (unitype) x1, 'd');
@@ -688,12 +713,17 @@ void turtlePerspective(double x, double y, double z, double *xOut, double *yOut)
 
 /* draws the turtle's path on the screen */
 void turtleUpdate() {
+<<<<<<< HEAD
     /* used to have a feature that only redrew the screen if there have been any changes from last frame, but it has been removed.
        opted to redraw every frame and not list_copy, an alternative is hashing the penPos list. An interesting idea for sure... for another time */
+=======
+    // used to have a feature that only redrew the screen if there have been any changes from last frame, but it has been removed.
+    // opted to redraw every frame and not list_copy, an alternative is hashing the penPos list. An interesting idea for sure... for another time
+>>>>>>> 65f6fd701560acc3f3477e0b89917bdf2a6bcf28
     int8_t changed = 0;
     uint32_t len = turtle.penPos -> length;
     unitype *ren = turtle.penPos -> data;
-    char *renType = turtle.penPos -> type;
+    int8_t *renType = turtle.penPos -> type;
     uint64_t oldHash = turtle.penHash;
     turtle.penHash = 0; // I don't use this but it's an idea: https://stackoverflow.com/questions/57455444/very-low-collision-non-cryptographic-hashing-function
     for (uint32_t i = 0; i < len; i++) {
