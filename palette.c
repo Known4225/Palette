@@ -6,11 +6,12 @@
 - 
 */
 
-#include "include/turtleTools.h"
-#include "include/osTools.h"
+#include "turtle.h"
 #include <time.h>
 
-#define NUMBER_OF_BOXES 34
+#define NUMBER_OF_BOXES 42
+#define NUMBER_OF_COLUMNS 7
+#define BOX_SIZE 40
 
 /* box */
 typedef struct {
@@ -86,18 +87,6 @@ void init() {
     dropdownInit("dropdown", dropdownOptions, &dropdownVar, TT_DROPDOWN_ALIGN_CENTER, UIX, UIY - 200, 10);
     dropdownInit("dropdown", dropdownOptions2, &dropdownVar2, TT_DROPDOWN_ALIGN_CENTER, UIX, UIY - 165, 10);
     textboxInit("textbox", 128, 150, 130, 10, 100);
-    double boxSliderCopy[] = {
-        0.0, 0.0, 0.0,       // override slider text
-        0.0, 0.0, 0.0,       // override slider bar
-        255.0, 255.0, 255.0, // override slider circle
-    };
-    memcpy(self.boxSliderColors, boxSliderCopy, sizeof(boxSliderCopy));
-    double boxSliderAltCopy[] = {
-        0.0, 0.0, 0.0,       // override slider text
-        255.0, 255.0, 255.0, // override slider bar
-        0.0, 0.0, 0.0,       // override slider circle
-    };
-    memcpy(self.boxSliderColorsAlt, boxSliderAltCopy, sizeof(boxSliderAltCopy));
     /* init fakePopup */
     fakePopup.minX = UIX - 150;
     fakePopup.minY = UIY - 31;
@@ -117,40 +106,48 @@ void init() {
         strcpy(self.asciiEnum[i], "NULL");
     }
     char asciiCopy[][64] = {
-        "BACKGROUND",
+        "TT_COLOR_BACKGROUND",
+        "TT_COLOR_BACKGROUND_HIGHLIGHT",
+        "TT_COLOR_BACKGROUND_ALTERNATE",
+        "TT_COLOR_BACKGROUND_COMPLEMENT",
         "TT_COLOR_TEXT",
+        "TT_COLOR_TEXT_HIGHLIGHT",
         "TT_COLOR_TEXT_ALTERNATE",
-        "TT_COLOR_RIBBON_TOP",
-        "TT_COLOR_RIBBON_DROPDOWN",
-        "TT_COLOR_RIBBON_SELECT",
-        "TT_COLOR_RIBBON_HOVER",
-        "TT_COLOR_POPUP_BOX",
-        "TT_COLOR_POPUP_BUTTON",
-        "TT_COLOR_POPUP_BUTTON_SELECT",
-        "TT_COLOR_BUTTON",
-        "TT_COLOR_BUTTON_SELECT",
-        "TT_COLOR_BUTTON_CLICKED",
-        "TT_COLOR_SWITCH_TEXT_HOVER",
-        "TT_COLOR_SWITCH_OFF",
-        "TT_COLOR_SWITCH_CIRCLE_OFF",
-        "TT_COLOR_SWITCH_ON",
-        "TT_COLOR_SWITCH_CIRCLE_ON",
-        "TT_COLOR_DIAL",
-        "TT_COLOR_DIAL_INNER",
-        "TT_COLOR_SLIDER_BAR",
-        "TT_COLOR_SLIDER_CIRCLE",
-        "TT_COLOR_SCROLLBAR_BASE",
-        "TT_COLOR_SCROLLBAR_BAR",
-        "TT_COLOR_SCROLLBAR_HOVER",
-        "TT_COLOR_SCROLLBAR_CLICKED",
-        "TT_COLOR_DROPDOWN",
-        "TT_COLOR_DROPDOWN_SELECT",
-        "TT_COLOR_DROPDOWN_HOVER",
-        "TT_COLOR_DROPDOWN_TRIANGLE",
-        "TT_COLOR_TEXTBOX_BOX",
-        "TT_COLOR_TEXTBOX_PHANTOM_TEXT",
-        "TT_COLOR_TEXTBOX_LINE",
-        "TT_COLOR_TEXTBOX_SELECT",
+        "TT_COLOR_TEXT_COMPLEMENT",
+        "TT_COLOR_COMPONENT",
+        "TT_COLOR_COMPONENT_HIGHLIGHT",
+        "TT_COLOR_COMPONENT_ALTERNATE",
+        "TT_COLOR_COMPONENT_COMPLEMENT",
+        "TT_COLOR_TERTIARY",
+        "TT_COLOR_TERTIARY_HIGHLIGHT",
+        "TT_COLOR_TERTIARY_ALTERNATE",
+        "TT_COLOR_TERTIARY_COMPLEMENT",
+        "TT_COLOR_RED",
+        "TT_COLOR_RED_ALTERNATE",
+        "TT_COLOR_ORANGE",
+        "TT_COLOR_ORANGE_ALTERNATE",
+        "TT_COLOR_YELLOW",
+        "TT_COLOR_YELLOW_ALTERNATE",
+        "TT_COLOR_GREEN",
+        "TT_COLOR_GREEN_ALTERNATE",
+        "TT_COLOR_CYAN",
+        "TT_COLOR_CYAN_ALTERNATE",
+        "TT_COLOR_BLUE",
+        "TT_COLOR_BLUE_ALTERNATE",
+        "TT_COLOR_PURPLE",
+        "TT_COLOR_PURPLE_ALTERNATE",
+        "TT_COLOR_MAGENTA",
+        "TT_COLOR_MAGENTA_ALTERNATE",
+        "TT_COLOR_PINK",
+        "TT_COLOR_PINK_ALTERNATE",
+        "TT_COLOR_BLACK",
+        "TT_COLOR_BLACK_ALTERNATE",
+        "TT_COLOR_WHITE",
+        "TT_COLOR_WHITE_ALTERNATE",
+        "TT_COLOR_DARK_GREY",
+        "TT_COLOR_DARK_GREY_ALTERNATE",
+        "TT_COLOR_LIGHT_GREY",
+        "TT_COLOR_LIGHT_GREY_ALTERNATE",
     };
     for (uint32_t i = 0; i < sizeof(asciiCopy) / 64; i++) {
         strcpy(self.asciiEnum[i], asciiCopy[i]);
@@ -158,8 +155,8 @@ void init() {
 
     /* boxes */
     self.lockOffsets = 0;
-    self.width = 6;
-    self.boxSize = 50;
+    self.width = NUMBER_OF_COLUMNS;
+    self.boxSize = BOX_SIZE;
     self.topX = -310 + self.boxSize * 0.5;
     self.topY = 160 - self.boxSize * 0.5;
     for (uint32_t i = 0; i < NUMBER_OF_BOXES; i++) {
@@ -177,12 +174,13 @@ void init() {
         self.newColorPalette[i * 6 + 5] = self.boxes[i].blueSave;
         self.boxes[i].x = self.topX + self.boxSize * (i % self.width) * 1.05;
         self.boxes[i].y = self.topY - self.boxSize * (i / self.width) * 1.05;
-        self.boxes[i].sliders[0] = sliderInit("", &(self.boxes[i].red), TT_SLIDER_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, self.boxes[i].x, self.boxes[i].y + 20, 5, self.boxSize * 0.8, 0, 255, 0);
-        self.boxes[i].sliders[1] = sliderInit("", &(self.boxes[i].green), TT_SLIDER_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, self.boxes[i].x, self.boxes[i].y + 10, 5, self.boxSize * 0.8, 0, 255, 0);
+        self.boxes[i].sliders[0] = sliderInit("", &(self.boxes[i].red), TT_SLIDER_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, self.boxes[i].x, self.boxes[i].y + self.boxSize / 2.5, 5, self.boxSize * 0.8, 0, 255, 0);
+        self.boxes[i].sliders[1] = sliderInit("", &(self.boxes[i].green), TT_SLIDER_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, self.boxes[i].x, self.boxes[i].y + self.boxSize / 5, 5, self.boxSize * 0.8, 0, 255, 0);
         self.boxes[i].sliders[2] = sliderInit("", &(self.boxes[i].blue), TT_SLIDER_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, self.boxes[i].x, self.boxes[i].y, 5, self.boxSize * 0.8, 0, 255, 0);
-        tt_colorOverride((void *) self.boxes[i].sliders[0], self.boxSliderColors, 9);
-        tt_colorOverride((void *) self.boxes[i].sliders[1], self.boxSliderColors, 9);
-        tt_colorOverride((void *) self.boxes[i].sliders[2], self.boxSliderColors, 9);
+        for (int32_t j = 0; j < 3; j++) {
+            self.boxes[i].sliders[j] -> color[TT_COLOR_SLOT_SLIDER_BAR] = TT_COLOR_BLACK;
+            self.boxes[i].sliders[j] -> color[TT_COLOR_SLOT_SLIDER_CIRCLE] = TT_COLOR_WHITE;
+        }
     }
 
     self.undoList = list_init();
@@ -302,17 +300,19 @@ void renderBoxes() {
         sprintf(hexStr, "#%02X%02X%02X", (int) round(self.boxes[i].red), (int) round(self.boxes[i].green), (int) round(self.boxes[i].blue));
         if (self.boxes[i].red + self.boxes[i].green + self.boxes[i].blue < 150) {
             turtlePenColor(255, 255, 255);
-            tt_colorOverride((void *) self.boxes[i].sliders[0], self.boxSliderColorsAlt, 9);
-            tt_colorOverride((void *) self.boxes[i].sliders[1], self.boxSliderColorsAlt, 9);
-            tt_colorOverride((void *) self.boxes[i].sliders[2], self.boxSliderColorsAlt, 9);
+            for (int32_t j = 0; j < 3; j++) {
+                self.boxes[i].sliders[j] -> color[TT_COLOR_SLOT_SLIDER_BAR] = TT_COLOR_WHITE;
+                self.boxes[i].sliders[j] -> color[TT_COLOR_SLOT_SLIDER_CIRCLE] = TT_COLOR_BLACK;
+            }
         } else {
             turtlePenColor(0, 0, 0);
-            tt_colorOverride((void *) self.boxes[i].sliders[0], self.boxSliderColors, 9);
-            tt_colorOverride((void *) self.boxes[i].sliders[1], self.boxSliderColors, 9);
-            tt_colorOverride((void *) self.boxes[i].sliders[2], self.boxSliderColors, 9);
+            for (int32_t j = 0; j < 3; j++) {
+                self.boxes[i].sliders[j] -> color[TT_COLOR_SLOT_SLIDER_BAR] = TT_COLOR_BLACK;
+                self.boxes[i].sliders[j] -> color[TT_COLOR_SLOT_SLIDER_CIRCLE] = TT_COLOR_WHITE;
+            }
         }
-        turtleTextWriteString(rgbStr, self.boxes[i].x, self.boxes[i].y - 10, self.boxes[i].size / 10, 50);
-        turtleTextWriteString(hexStr, self.boxes[i].x, self.boxes[i].y - 20, self.boxes[i].size / 10, 50);
+        turtleTextWriteString(rgbStr, self.boxes[i].x, self.boxes[i].y - self.boxes[i].size / 5, self.boxes[i].size / 10, 50);
+        turtleTextWriteString(hexStr, self.boxes[i].x, self.boxes[i].y - self.boxes[i].size / 2.5, self.boxes[i].size / 10, 50);
     }
     /* set color palette */
     double setColorPalette[NUMBER_OF_BOXES * 3]; // this is so terrible
@@ -338,7 +338,8 @@ void renderBoxes() {
     if (self.saved == -2) {
         self.saved = 0;
     }
-    memcpy(tt_themeColors, setColorPalette + 3, sizeof(tt_themeColors));
+    memcpy(tt_themeColors, setColorPalette, NUMBER_OF_BOXES * sizeof(double) * 3);
+    turtleBgColor(tt_themeColors[TT_COLOR_BACKGROUND_COMPLEMENT], tt_themeColors[TT_COLOR_BACKGROUND_COMPLEMENT + 1], tt_themeColors[TT_COLOR_BACKGROUND_COMPLEMENT + 2]);
     /* display copy message */
     if (self.copyMessage > 0) {
         if (self.copyMessage == 255) {
@@ -366,7 +367,7 @@ void displaySaveIndicator() {
 }
 
 void renderFakePopup() {
-    tt_setColor(TT_COLOR_POPUP_BOX);
+    tt_setColor(TT_COLOR_SLOT_POPUP_BOX);
     turtleRectangle(fakePopup.minX, fakePopup.minY, fakePopup.maxX, fakePopup.maxY);
     double textSize = 5;
     double textX = fakePopup.minX + (fakePopup.maxX - fakePopup.minX) / 2;
@@ -389,7 +390,7 @@ void renderFakePopup() {
         double strLen = turtleTextGetStringLength(fakePopup.options -> data[i].s, textSize);
         if (turtle.mouseX > textX - textSize && turtle.mouseX < textX + strLen + textSize &&
         turtle.mouseY > textY - textSize && turtle.mouseY < textY + textSize) {
-            tt_setColor(TT_COLOR_POPUP_BUTTON_SELECT);
+            tt_setColor(TT_COLOR_SLOT_POPUP_BUTTON_SELECT);
             turtleRectangle(textX - textSize, textY - textSize, textX + textSize + strLen, textY + textSize);
             if (turtleMouseDown()) {
                 if (fakePopup.mouseDown == 0) {
@@ -407,7 +408,7 @@ void renderFakePopup() {
                 }
             }
         } else {
-            tt_setColor(TT_COLOR_POPUP_BUTTON);
+            tt_setColor(TT_COLOR_SLOT_POPUP_BUTTON);
             turtleRectangle(textX - textSize, textY - textSize, textX + textSize + strLen, textY + textSize);
         }
         tt_setColor(TT_COLOR_TEXT_ALTERNATE);
@@ -425,43 +426,52 @@ void export(const char *filename) {
     self.saved = 1;
     FILE *fp = fopen(filename, "w");
     char messages[][64] = {
-        "// text color (0)",
-        "// text color alternate (3)",
-        "// ribbon top bar color (6)",
-        "// ribbon dropdown color (9)",
-        "// ribbon select color (12)",
-        "// ribbon hover color (15)",
-        "// popup box color (18)",
-        "// popup boxes color (21)",
-        "// popup boxes select color (24)",
-        "// button color (27)",
-        "// button select color (30)",
-        "// button clicked color (33)",
-        "// switch text hover (36)",
-        "// switch color off (39)",
-        "// switch circle color off (42)",
-        "// switch color on (45)",
-        "// switch circle color on (48)",
-        "// dial color (51)",
-        "// dial inner circle color (54)",
-        "// slider bar color (57)",
-        "// slider circle color (60)",
-        "// scrollbar bar base color (63)",
-        "// scrollbar bar color (66)",
-        "// scrollbar bar hover color (69)",
-        "// scrollbar bar clicked color (72)",
-        "// dropdown color (75)",
-        "// dropdown select color (78)",
-        "// dropdown hover color (81)",
-        "// dropdown triangle color (84)",
-        "// textbox color (87)",
-        "// textbox phantom text color (90)",
-        "// textbox line color (93)",
-        "// textbox select color (96)",
+        "// TT_COLOR_BACKGROUND (0)",
+        "// TT_COLOR_BACKGROUND_HIGHLIGHT (3)",
+        "// TT_COLOR_BACKGROUND_ALTERNATE (6)",
+        "// TT_COLOR_BACKGROUND_COMPLEMENT (9)",
+        "// TT_COLOR_TEXT (12)",
+        "// TT_COLOR_TEXT_HIGHLIGHT (15)",
+        "// TT_COLOR_TEXT_ALTERNATE (18)",
+        "// TT_COLOR_TEXT_COMPLEMENT (21)",
+        "// TT_COLOR_COMPONENT (24)",
+        "// TT_COLOR_COMPONENT_HIGHLIGHT (27)",
+        "// TT_COLOR_COMPONENT_ALTERNATE (30)",
+        "// TT_COLOR_COMPONENT_COMPLEMENT (33)",
+        "// TT_COLOR_TERTIARY (36)",
+        "// TT_COLOR_TERTIARY_HIGHLIGHT (39)",
+        "// TT_COLOR_TERTIARY_ALTERNATE (42)",
+        "// TT_COLOR_TERTIARY_COMPLEMENT (45)",
+        "// TT_COLOR_RED (48)",
+        "// TT_COLOR_RED_ALTERNATE (51)",
+        "// TT_COLOR_ORANGE (54)",
+        "// TT_COLOR_ORANGE_ALTERNATE (57)",
+        "// TT_COLOR_YELLOW (60)",
+        "// TT_COLOR_YELLOW_ALTERNATE (63)",
+        "// TT_COLOR_GREEN (66)",
+        "// TT_COLOR_GREEN_ALTERNATE (69)",
+        "// TT_COLOR_CYAN (72)",
+        "// TT_COLOR_CYAN_ALTERNATE (75)",
+        "// TT_COLOR_BLUE (78)",
+        "// TT_COLOR_BLUE_ALTERNATE (81)",
+        "// TT_COLOR_PURPLE (84)",
+        "// TT_COLOR_PURPLE_ALTERNATE (87)",
+        "// TT_COLOR_MAGENTA (90)",
+        "// TT_COLOR_MAGENTA_ALTERNATE (93)",
+        "// TT_COLOR_PINK (96)",
+        "// TT_COLOR_PINK_ALTERNATE (99)",
+        "// TT_COLOR_BLACK (102)",
+        "// TT_COLOR_BLACK_ALTERNATE (105)",
+        "// TT_COLOR_WHITE (108)",
+        "// TT_COLOR_WHITE_ALTERNATE (111)",
+        "// TT_COLOR_DARK_GREY (114)",
+        "// TT_COLOR_DARK_GREY_ALTERNATE (117)",
+        "// TT_COLOR_LIGHT_GREY (120)",
+        "// TT_COLOR_LIGHT_GREY_ALTERNATE (123)",
     };
-    for (uint32_t i = 0; i < NUMBER_OF_BOXES - 1; i++) {
+    for (uint32_t i = 0; i < NUMBER_OF_BOXES; i++) {
         char line[128];
-        sprintf(line, "%0.1lf, %0.1lf, %0.1lf,", self.boxes[i + 1].red, self.boxes[i + 1].green, self.boxes[i + 1].blue);
+        sprintf(line, "%0.1lf, %0.1lf, %0.1lf,", self.boxes[i].red, self.boxes[i].green, self.boxes[i].blue);
         while (strlen(line) < 21) {
             strcat(line, " ");
         }
@@ -475,15 +485,15 @@ void export(const char *filename) {
 void import(const char *filename) {
     self.saved = -1;
     FILE *fp = fopen(filename, "r");
-    for (uint32_t i = 0; i < NUMBER_OF_BOXES - 1; i++) {
+    for (uint32_t i = 0; i < NUMBER_OF_BOXES; i++) {
         char line[128];
         fgets(line, 128, fp);
-        sscanf(line, "%lf, %lf, %lf", &self.boxes[i + 1].red, &self.boxes[i + 1].green, &self.boxes[i + 1].blue);
+        sscanf(line, "%lf, %lf, %lf", &self.boxes[i].red, &self.boxes[i].green, &self.boxes[i].blue);
     }
     /* special - make background color the same as TT_COLOR_DIAL_INNER */
-    self.boxes[0].red = self.boxes[TT_COLOR_DIAL_INNER / 3 + 1].red;
-    self.boxes[0].green = self.boxes[TT_COLOR_DIAL_INNER / 3 + 1].green;
-    self.boxes[0].blue = self.boxes[TT_COLOR_DIAL_INNER / 3 + 1].blue;
+    // self.boxes[0].red = self.boxes[TT_COLOR_BACKGROUND / 3 + 1].red;
+    // self.boxes[0].green = self.boxes[TT_COLOR_BACKGROUND / 3 + 1].green;
+    // self.boxes[0].blue = self.boxes[TT_COLOR_BACKGROUND / 3 + 1].blue;
     fclose(fp);
 }
 
@@ -510,7 +520,7 @@ void mouseTick() {
             }
         } else {
             if (turtle.mouseX > self.boxes[i].x - self.boxes[i].size * 0.5 && turtle.mouseX < self.boxes[i].x + self.boxes[i].size * 0.5 &&
-                turtle.mouseY > self.boxes[i].y - self.boxes[i].size * 0.5 && turtle.mouseY < self.boxes[i].y - self.boxes[i].size * 0.05) {
+                turtle.mouseY > self.boxes[i].y - self.boxes[i].size * 0.5 && turtle.mouseY < self.boxes[i].y - self.boxes[i].size * 0.1) {
                 self.boxes[i].status = -1;
             } else {
                 self.boxes[i].status = 0;
@@ -598,14 +608,14 @@ void mouseTick() {
         if (self.keys[4] == 0) {
             self.keys[4] = 1;
             if (self.keys[3]) {
-                if (strcmp(osToolsFileDialog.selectedFilename, "null") == 0) {
-                    if (osToolsFileDialogPrompt(1, "") != -1) {
-                        printf("Saved to: %s\n", osToolsFileDialog.selectedFilename);
-                        export(osToolsFileDialog.selectedFilename);
+                if (osToolsFileDialog.selectedFilenames -> length == 0) {
+                    if (osToolsFileDialogSave(OSTOOLS_FILE_DIALOG_FILE, "", NULL) != -1) {
+                        printf("Saved to: %s\n", osToolsFileDialog.selectedFilenames -> data[0].s);
+                        export(osToolsFileDialog.selectedFilenames -> data[0].s);
                     }
                 } else {
-                    printf("Saved to: %s\n", osToolsFileDialog.selectedFilename);
-                    export(osToolsFileDialog.selectedFilename);
+                    printf("Saved to: %s\n", osToolsFileDialog.selectedFilenames -> data[0].s);
+                    export(osToolsFileDialog.selectedFilenames -> data[0].s);
                 }
             }
         }
@@ -755,7 +765,7 @@ void mouseTick() {
     }
     /* scroll wheel */
     for (uint32_t i = 0; i < tt_elements.all -> length; i++) {
-        if (((tt_button_t *) tt_elements.all -> data[i].p) -> element != TT_ELEMENT_SCROLLBAR && ((tt_button_t *) tt_elements.all -> data[i].p) -> color.colorOverride != 1) {
+        if (((tt_button_t *) tt_elements.all -> data[i].p) -> element != TT_ELEMENT_SCROLLBAR && ((tt_button_t *) tt_elements.all -> data[i].p) -> x > -10) {
             ((tt_button_t *) tt_elements.all -> data[i].p) -> y = self.yPositions -> data[i].d + scrollbarVar * 0.2;
         }
     }
@@ -774,11 +784,11 @@ void mouseTick() {
 }
 
 void parseRibbonOutput() {
-    if (ribbonRender.output[0] == 1) {
-        ribbonRender.output[0] = 0;
-        if (ribbonRender.output[1] == 0) { // File
-            if (ribbonRender.output[2] == 1) { // New
-                strcpy(osToolsFileDialog.selectedFilename, "null");
+    if (tt_ribbon.output[0] == 1) {
+        tt_ribbon.output[0] = 0;
+        if (tt_ribbon.output[1] == 0) { // File
+            if (tt_ribbon.output[2] == 1) { // New
+                list_clear(osToolsFileDialog.selectedFilenames);
                 self.saved = -1;
                 for (uint32_t i = 0; i < NUMBER_OF_BOXES; i++) {
                     self.boxes[i].red = randomDouble(0, 255);
@@ -794,27 +804,28 @@ void parseRibbonOutput() {
                 list_clear(self.undoList);
                 self.undoIndex = 0;
             }
-            if (ribbonRender.output[2] == 2) { // Save
-                if (strcmp(osToolsFileDialog.selectedFilename, "null") == 0) {
-                    if (osToolsFileDialogPrompt(1, "") != -1) {
-                        printf("Saved to: %s\n", osToolsFileDialog.selectedFilename);
-                        export(osToolsFileDialog.selectedFilename);
+            if (tt_ribbon.output[2] == 2) { // Save
+                if (osToolsFileDialog.selectedFilenames -> length == 0) {
+                    if (osToolsFileDialogSave(OSTOOLS_FILE_DIALOG_FILE, "", NULL) != -1) {
+                        printf("Saved to: %s\n", osToolsFileDialog.selectedFilenames -> data[0].s);
+                        export(osToolsFileDialog.selectedFilenames -> data[0].s);
                     }
                 } else {
-                    printf("Saved to: %s\n", osToolsFileDialog.selectedFilename);
-                    export(osToolsFileDialog.selectedFilename);
+                    printf("Saved to: %s\n", osToolsFileDialog.selectedFilenames -> data[0].s);
+                    export(osToolsFileDialog.selectedFilenames -> data[0].s);
                 }
             }
-            if (ribbonRender.output[2] == 3) { // Save As...
-                if (osToolsFileDialogPrompt(1, "") != -1) {
-                    printf("Saved to: %s\n", osToolsFileDialog.selectedFilename);
-                    export(osToolsFileDialog.selectedFilename);
+            if (tt_ribbon.output[2] == 3) { // Save As...
+                if (osToolsFileDialogSave(OSTOOLS_FILE_DIALOG_FILE, "", NULL) != -1) {
+                    printf("Saved to: %s\n", osToolsFileDialog.selectedFilenames -> data[0].s);
+                    export(osToolsFileDialog.selectedFilenames -> data[0].s);
                 }
             }
-            if (ribbonRender.output[2] == 4) { // Open
-                if (osToolsFileDialogPrompt(0, "") != -1) {
-                    printf("Loaded data from: %s\n", osToolsFileDialog.selectedFilename);
-                    import(osToolsFileDialog.selectedFilename);
+            if (tt_ribbon.output[2] == 4) { // Open
+                list_clear(osToolsFileDialog.selectedFilenames);
+                if (osToolsFileDialogOpen(OSTOOLS_FILE_DIALOG_SINGLE_SELECT, OSTOOLS_FILE_DIALOG_FILE, "", NULL) != -1) {
+                    printf("Loaded data from: %s\n", osToolsFileDialog.selectedFilenames -> data[0].s);
+                    import(osToolsFileDialog.selectedFilenames -> data[0].s);
                     list_clear(self.undoList);
                     self.undoIndex = 0;
                     self.saved = -1;
@@ -829,36 +840,28 @@ void parseRibbonOutput() {
                 }
             }
         }
-        if (ribbonRender.output[1] == 1) { // Edit
-            if (ribbonRender.output[2] == 1) { // Undo
+        if (tt_ribbon.output[1] == 1) { // Edit
+            if (tt_ribbon.output[2] == 1) { // Undo
                 undo();
             }
-            if (ribbonRender.output[2] == 2) { // Redo
+            if (tt_ribbon.output[2] == 2) { // Redo
                 redo();
             }
-            if (ribbonRender.output[2] == 3) { // Cut
+            if (tt_ribbon.output[2] == 3) { // Cut
                 osToolsClipboardSetText("test123");
                 printf("Cut \"test123\" to clipboard!\n");
             }
-            if (ribbonRender.output[2] == 4) { // Copy
+            if (tt_ribbon.output[2] == 4) { // Copy
                 osToolsClipboardSetText("test345");
                 printf("Copied \"test345\" to clipboard!\n");
             }
-            if (ribbonRender.output[2] == 5) { // Paste
+            if (tt_ribbon.output[2] == 5) { // Paste
                 osToolsClipboardGetText();
                 printf("Pasted \"%s\" from clipboard!\n", osToolsClipboard.text);
             }
         }
-        if (ribbonRender.output[1] == 2) { // View
-            if (ribbonRender.output[2] == 1) { // Change theme
-                printf("Change theme\n");
-                if (tt_theme == TT_THEME_DARK) {
-                    turtleBgColor(180, 180, 180);
-                } else {
-                    turtleBgColor(30, 30, 30);
-                }
-            } 
-            if (ribbonRender.output[2] == 2) { // GLFW
+        if (tt_ribbon.output[1] == 2) { // View
+            if (tt_ribbon.output[2] == 1) { // GLFW
                 printf("GLFW settings\n");
             } 
         }
@@ -866,26 +869,26 @@ void parseRibbonOutput() {
 }
 
 void parsePopupOutput(GLFWwindow *window) {
-    if (popup.output[0] == 1) {
-        popup.output[0] = 0; // untoggle
-        if (popup.output[1] == 0) { // save
-            if (strcmp(osToolsFileDialog.selectedFilename, "null") == 0) {
-                if (osToolsFileDialogPrompt(1, "") != -1) {
-                    printf("Saved to: %s\n", osToolsFileDialog.selectedFilename);
-                    export(osToolsFileDialog.selectedFilename);
+    if (tt_popup.output[0] == 1) {
+        tt_popup.output[0] = 0; // untoggle
+        if (tt_popup.output[1] == 0) { // save
+            if (osToolsFileDialog.selectedFilenames -> length == 0) {
+                if (osToolsFileDialogSave(OSTOOLS_FILE_DIALOG_FILE, "", NULL) != -1) {
+                    printf("Saved to: %s\n", osToolsFileDialog.selectedFilenames -> data[0].s);
+                    export(osToolsFileDialog.selectedFilenames -> data[0].s);
                 }
             } else {
-                printf("Saved to: %s\n", osToolsFileDialog.selectedFilename);
-                export(osToolsFileDialog.selectedFilename);
+                printf("Saved to: %s\n", osToolsFileDialog.selectedFilenames -> data[0].s);
+                export(osToolsFileDialog.selectedFilenames -> data[0].s);
             }
             turtle.close = 0;
             glfwSetWindowShouldClose(window, 0);
         }
-        if (popup.output[1] == 1) { // cancel
+        if (tt_popup.output[1] == 1) { // cancel
             turtle.close = 0;
             glfwSetWindowShouldClose(window, 0);
         }
-        if (popup.output[1] == 2) { // close
+        if (tt_popup.output[1] == 2) { // close
             turtle.popupClose = 1;
         }
     }
@@ -912,33 +915,31 @@ int main(int argc, char *argv[]) {
 
     /* initialise osTools */
     osToolsInit(argv[0], window); // must include argv[0] to get executableFilepath, must include GLFW window
-    osToolsFileDialogAddExtension("txt"); // add txt to extension restrictions
-    osToolsFileDialogAddExtension("pal"); // add pal to extension restrictions
+    osToolsFileDialogAddGlobalExtension("txt"); // add txt to extension restrictions
+    osToolsFileDialogAddGlobalExtension("pal"); // add pal to extension restrictions
     /* initialize turtle */
     turtleInit(window, -320, -180, 320, 180);
     /* initialise turtleText */
     strcpy(constructedPath, osToolsFileDialog.executableFilepath);
-    strcat(constructedPath, "include/roberto.tgl");
+    strcat(constructedPath, "config/roberto.tgl");
     turtleTextInit(constructedPath);
     /* initialise turtleTools ribbon */
     strcpy(constructedPath, osToolsFileDialog.executableFilepath);
-    strcat(constructedPath, "include/ribbonConfig.txt");
+    strcat(constructedPath, "config/ribbonConfig.txt");
     ribbonInit(constructedPath);
     /* initialise turtleTools popup */
     strcpy(constructedPath, osToolsFileDialog.executableFilepath);
-    strcat(constructedPath, "include/popupConfig.txt");
-    popupInit(constructedPath, -60, -20, 60, 20);
+    strcat(constructedPath, "config/popupConfig.txt");
+    popupInit(constructedPath);
 
     uint32_t tps = 120; // ticks per second (locked to fps in this case)
     uint64_t tick = 0; // count number of ticks since application started
     clock_t start, end;
 
-    turtleBgColor(180, 180, 180);
-
     init();
     if (argc > 1) {
-        strcpy(osToolsFileDialog.selectedFilename, argv[1]);
-        import(osToolsFileDialog.selectedFilename);
+        list_append(osToolsFileDialog.selectedFilenames, (unitype) argv[1], 's');
+        import(osToolsFileDialog.selectedFilenames -> data[0].s);
     }
 
     while (turtle.popupClose == 0) {
