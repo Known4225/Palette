@@ -50,6 +50,7 @@ typedef struct {
     int32_t dragBox;
     int32_t saved;
     list_t *yPositions;
+    tt_context_t *context;
     double scroll; // scroll wheel
     double scrollFactor; // scroll wheel percentage of scrollbar advanced per scroll
 } palette_t;
@@ -58,7 +59,7 @@ palette_t self;
 tt_popup_t fakePopup;
 
 /* UI variables */
-int8_t buttonVar = 0, switchVar = 0;
+int8_t buttonVar = 0, switchVar = 0, checkboxVar = 0;
 int32_t dropdownVar = 0, dropdownVar2 = 0;
 double dialVar = 0.0, sliderVar = 0.0, scrollbarVar = 0.0;
 
@@ -78,15 +79,24 @@ void init() {
     list_append(dropdownOptions2, (unitype) "Go", 's');
     double UIX = 200;
     double UIY = 100;
-    buttonInit("button", &buttonVar, UIX, UIY, 10);
-    switchInit("switch", &switchVar, UIX, UIY - 40, 10);
-    dialInit("dial", &dialVar, TT_DIAL_EXP, UIX, UIY - 80, 10, 0, 1000, 1);
-    sliderInit("slider", &sliderVar, TT_SLIDER_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, UIX, UIY - 120, 10, 50, 0, 10, 1);
-    sliderInit("slider", &sliderVar, TT_SLIDER_VERTICAL, TT_SLIDER_ALIGN_CENTER, UIX - 50, UIY - 120, 10, 50, 0, 10, 1);
+    buttonInit("Button", &buttonVar, UIX, UIY, 10);
+    switchInit("Switch", &switchVar, UIX, UIY - 40, 10);
+    tt_switch_t *checkbox = switchInit("Checkbox", &checkboxVar, UIX - 30, UIY - 220, 10);
+    checkbox -> style = TT_SWITCH_STYLE_CHECKBOX;
+    dialInit("Dial", &dialVar, TT_DIAL_EXP, UIX, UIY - 80, 10, 0, 1000, 1);
+    sliderInit("Slider", &sliderVar, TT_SLIDER_HORIZONTAL, TT_SLIDER_ALIGN_CENTER, UIX, UIY - 120, 10, 50, 0, 10, 1);
+    sliderInit("Slider", &sliderVar, TT_SLIDER_VERTICAL, TT_SLIDER_ALIGN_CENTER, UIX - 50, UIY - 120, 10, 50, 0, 10, 1);
     scrollbarInit(&scrollbarVar, TT_SCROLLBAR_VERTICAL, 310, 0, 10, 320, 90);
-    dropdownInit("dropdown", dropdownOptions, &dropdownVar, TT_DROPDOWN_ALIGN_CENTER, UIX, UIY - 200, 10);
-    dropdownInit("dropdown", dropdownOptions2, &dropdownVar2, TT_DROPDOWN_ALIGN_CENTER, UIX, UIY - 165, 10);
+    dropdownInit("Dropdown", dropdownOptions, &dropdownVar, TT_DROPDOWN_ALIGN_CENTER, UIX, UIY - 200, 10);
+    dropdownInit("Dropdown", dropdownOptions2, &dropdownVar2, TT_DROPDOWN_ALIGN_CENTER, UIX, UIY - 165, 10);
     textboxInit("textbox", 128, 150, 130, 10, 100);
+    list_t *contextOptions = list_init();
+    list_append(contextOptions, (unitype) "Hello", 's');
+    list_append(contextOptions, (unitype) "World", 's');
+    list_append(contextOptions, (unitype) "Test", 's');
+    int32_t contextVar = 0;
+    self.context = contextInit(contextOptions, &contextVar, 0, 0, 10);
+    self.context -> enabled = TT_ELEMENT_HIDE;
     /* init fakePopup */
     fakePopup.minX = UIX - 150;
     fakePopup.minY = UIY - 31;
@@ -358,7 +368,7 @@ void renderBoxes() {
 void displaySaveIndicator() {
     /* display saved indicator */
     if (self.saved == 0) {
-        turtlePenColor(self.boxes[18].red, self.boxes[18].green, self.boxes[18].blue);
+        turtlePenColor(self.boxes[0].red, self.boxes[0].green, self.boxes[0].blue);
         turtlePenSize(5);
         turtleGoto(310, 175);
         turtlePenDown();
@@ -571,6 +581,17 @@ void mouseTick() {
             self.boxes[i].saveStatus = 0;
         }
     }
+    if (turtleMouseRight()) {
+        if (self.keys[2] == 0) {
+            self.keys[2] = 1;
+            contextCalculateMax(self.context);
+            self.context -> enabled = TT_ELEMENT_ENABLED;
+            self.context -> x = turtle.mouseX;
+            self.context -> y = turtle.mouseY;
+        }
+    } else {
+        self.keys[2] = 0;
+    }
     for (uint32_t i = 0; i < NUMBER_OF_BOXES; i++) {
         if (self.boxes[i].red + self.boxes[i].green + self.boxes[i].blue < 150) {
             turtlePenColor(255, 255, 255);
@@ -765,7 +786,7 @@ void mouseTick() {
     }
     /* scroll wheel */
     for (uint32_t i = 0; i < tt_elements.all -> length; i++) {
-        if (((tt_button_t *) tt_elements.all -> data[i].p) -> element != TT_ELEMENT_SCROLLBAR && ((tt_button_t *) tt_elements.all -> data[i].p) -> x > -10) {
+        if (((tt_button_t *) tt_elements.all -> data[i].p) -> element != TT_ELEMENT_SCROLLBAR && ((tt_button_t *) tt_elements.all -> data[i].p) -> element != TT_ELEMENT_CONTEXT && ((tt_button_t *) tt_elements.all -> data[i].p) -> x > -10) {
             ((tt_button_t *) tt_elements.all -> data[i].p) -> y = self.yPositions -> data[i].d + scrollbarVar * 0.2;
         }
     }
@@ -903,14 +924,15 @@ int main(int argc, char *argv[]) {
 
     /* Create a windowed mode window and its OpenGL context */
     const GLFWvidmode *monitorSize = glfwGetVideoMode(glfwGetPrimaryMonitor());
-    int32_t windowHeight = monitorSize -> height * 0.85;
-    GLFWwindow *window = glfwCreateWindow(windowHeight * 16 / 9, windowHeight, "palette", NULL, NULL);
+    int32_t windowHeight = monitorSize -> height;
+    GLFWwindow *window = glfwCreateWindow(windowHeight * 16 / 9, windowHeight, "turtle demo", NULL, NULL);
     if (!window) {
         glfwTerminate();
         return -1;
     }
     glfwMakeContextCurrent(window);
-    glfwSetWindowSizeLimits(window, windowHeight * 16 / 9, windowHeight, windowHeight * 16 / 9, windowHeight);
+    glfwSetWindowSizeLimits(window, windowHeight * 16 / 9 * 0.4, windowHeight * 0.4, windowHeight * 16 / 9, windowHeight);
+
     char constructedPath[4097 + 32];
 
     /* initialise osTools */
@@ -919,6 +941,7 @@ int main(int argc, char *argv[]) {
     osToolsFileDialogAddGlobalExtension("pal"); // add pal to extension restrictions
     /* initialize turtle */
     turtleInit(window, -320, -180, 320, 180);
+    glfwSetWindowSize(window, windowHeight * 16 / 9 * 0.85, monitorSize -> height * 0.85); // doing it this way ensures the window spawns in the top left of the monitor and fixes resizing limits
     /* initialise turtleText */
     strcpy(constructedPath, osToolsFileDialog.executableFilepath);
     strcat(constructedPath, "config/roberto.tgl");
@@ -949,7 +972,7 @@ int main(int argc, char *argv[]) {
         renderBoxes();
         char coordsStr[24];
         sprintf(coordsStr, "%.2lf, %.2lf", turtle.mouseX, turtle.mouseY);
-        tt_setColor(TT_COLOR_TEXT);
+        tt_setColor(TT_COLOR_BACKGROUND);
         turtleTextWriteString(coordsStr, -310, -170, 5, 0);
         turtleToolsUpdateUI(); // update turtleTools UI elements
         renderFakePopup();
