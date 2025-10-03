@@ -584,10 +584,11 @@ void mouseTick() {
     if (turtleMouseRight()) {
         if (self.keys[2] == 0) {
             self.keys[2] = 1;
-            contextCalculateMax(self.context);
-            self.context -> enabled = TT_ELEMENT_ENABLED;
-            self.context -> x = turtle.mouseX;
-            self.context -> y = turtle.mouseY;
+            if (turtle.mouseX > self.topX + self.boxSize * self.width) {
+                self.context -> enabled = TT_ELEMENT_ENABLED;
+                self.context -> x = turtle.mouseX;
+                self.context -> y = turtle.mouseY;
+            }
         }
     } else {
         self.keys[2] = 0;
